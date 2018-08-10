@@ -12,7 +12,3 @@
 3. datachange.py 文件 处理数据
 4. report.py 文件 处理本地excel模板
 5. svc.py 文件 处理前端
-
-· main.py 文件方法
-
-1.
