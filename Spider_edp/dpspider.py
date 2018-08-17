@@ -89,6 +89,7 @@ if __name__ == "__main__":  # 主函数
 
     IndexCookies = Get_CookeandSession(LoginUrl)
     Response = Get_Data(TargetUrl, IndexCookies)
+    print(Response)
     a = DataOptimization(Response)
 
 
