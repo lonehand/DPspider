@@ -7,15 +7,15 @@ from lxml import etree
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
-from datachange import DataOptimization
+from Spider_edp.datachange import MeChart_Optimization, DataOptimization
 
 # 浏览器设置
 ChromeOptions = webdriver.ChromeOptions()
 ChromeOptions.add_argument("disable-infobars")
 
 # 账号与密码
-Account = ["meiruiTF", "cdjianli", "bjykyl"]
-Password = ["cdmeirui123", "cdjianli123", "ykyl180225"]
+Account = ["meiruiTF", "cdjianli", "bjykyl", "cicheng"]
+Password = ["cdmeirui123", "cdjianli123", "ykyl180225", "71815igm"]
 
 # 伪装浏览器头
 header = {
@@ -29,20 +29,23 @@ header = {
 }
 
 # 登陆网址
-LoginUrl = ('https://epassport.meituan.com/account/unitivelogin?bg_source=2&service=dpmerchantlogin&feconfig=dpmerchantlogin&leftBottomLink='
-            'https://e.dianping.com/shopaccount%2fphoneRegisterAccount&continue='
-            'https%3A%2F%2Fe.dianping.com%2Fshopaccount%2Flogin%2Fsetedper%3FtargetUrl%3D'
-            'https%253A%252F%252Fe.dianping.com%252Fshopportal%252Fpc%252Fnewindex')
+LoginUrl = r'https://epassport.meituan.com/account/unitivelogin?bg_source=2&service=dpmerchantlogin&feconfig=dpmerchantlogin&leftBottomLink=https%3a%2f%2fe.dianping.com%2fshopaccount%2fphoneRegisterAccount&continue=https%3A%2F%2Fe.dianping.com%2Fshopaccount%2Flogin%2Fsetedper%3FtargetUrl%3Dhttps%253A%252F%252Fe.dianping.com%252Fshopportal%252Fpc%252Fnewindex'
 
 # 流量数据接口
-TargetUrl = "http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=8352512&tab=0&device=1"
+TrafficScale = "http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=8352512&tab=0&device=1"
+
+# 流量质量接口
+TrafiicQuality = 'http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=8352512&tab=1&device=1'
+
+# 口碑管理接口
+MerChat_api = 'https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000'
 
 # 登陆后的session（）
 IndexResponse = requests.session()
 
 # session登陆商家后台模块，动态cookies
 # 请求商家后台，并提供相应返回 session()
-def Get_CookeandSession(target):  # 请求商家后台
+def Get_CookeandSession(target):  # 请求商 家后台
     try:
         ChromeBrowser = webdriver.Chrome(options=ChromeOptions)
         RowAction = ActionChains(ChromeBrowser)
@@ -70,27 +73,32 @@ def Get_CookeandSession(target):  # 请求商家后台
     except Exception as errorinfo:
         return errorinfo
 
-# 获取流量
-def Get_Data(TargetUrl, IndexCookies):
+# 获取网页结构
+def Get_Data(targeturl, IndexCookies):
     for Cookies in IndexCookies:
         IndexResponse.cookies.set(
             Cookies['name'], Cookies['value']
         )
     IndexResponse.headers.clear()
-    result = IndexResponse.get(TargetUrl)
+    result = IndexResponse.get(targeturl)
     return result.text
 
 # 主函数
-if __name__ == "__main__":  # 主函数
-
-    '''
-        __author__: johnny leaf
-    '''
+def spidermain():  # 主函数
 
     IndexCookies = Get_CookeandSession(LoginUrl)
-    Response = Get_Data(TargetUrl, IndexCookies)
-    print(Response)
-    a = DataOptimization(Response)
+    ScaleResponse = Get_Data(TrafficScale, IndexCookies)
+    QualityResponse = Get_Data(TrafiicQuality, IndexCookies)
+    MerChatResponse = Get_Data(MerChat_api, IndexCookies)
+    MerchatDatas = MeChart_Optimization(MerChatResponse)
+    TrafficDatas = DataOptimization(ScaleResponse, QualityResponse)
+    for i in MerchatDatas:
+        print(i, ":", MerchatDatas[i])
+    return TrafficDatas
+    # for key in TrafficDatas:
+    #     print(key, ":", TrafficDatas[key])
+
+
 
 
 
