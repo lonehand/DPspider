@@ -89,11 +89,9 @@ def spidermain():  # 主函数
     IndexCookies = Get_CookeandSession(LoginUrl)
     ScaleResponse = Get_Data(TrafficScale, IndexCookies)
     QualityResponse = Get_Data(TrafiicQuality, IndexCookies)
-    MerChatResponse = Get_Data(MerChat_api, IndexCookies)
-    MerchatDatas = MeChart_Optimization(MerChatResponse)
+    # MerChatResponse = Get_Data(MerChat_api, IndexCookies)
+    # MerchatDatas = MeChart_Optimization(MerChatResponse)
     TrafficDatas = DataOptimization(ScaleResponse, QualityResponse)
-    for i in MerchatDatas:
-        print(i, ":", MerchatDatas[i])
     return TrafficDatas
     # for key in TrafficDatas:
     #     print(key, ":", TrafficDatas[key])

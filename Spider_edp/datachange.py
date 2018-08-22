@@ -25,8 +25,11 @@ merchatDict = {}
 
 # ++++++++++++++++ 流量数据+++++++++++++++
 def Getlist(data):
-    result = data[1:-1].replace('"','').split(",")
-    return result
+    try:
+        result = data[1:-1].replace('"','').split(",")
+        return result
+    except Exception:
+        return '无'
 
 # 流量数据爬取
 def DataOptimization(ScaleResponse, QualityResponse):
@@ -58,13 +61,15 @@ def DataOptimization(ScaleResponse, QualityResponse):
 
 # ++++++++++++++++++++++++++口碑数据+++++++++++++++++++++++
 def Get_year(strl):
-    result = re.findall('lasContact":"(.*?)","', strl)
-    print(result)
-    return str(result[:4])
+    if strl == '':
+        return '无记录'
+    else:
+        year = int(str(re.search('lastContact":"(.*?)","', strl).group(1))[:4])
+        return year
 
 def Get_mouth(strl):
-    result = re.search('lasContact":"(.*?)","', strl)
-    return result[5:7]
+    result = re.search('lastContact":"(.*?)","', strl).group(1)
+    return int(str(result)[5:7])
 
 def Get_name(strl):
     result = re.search('clientName":"(.*?)","', strl)
@@ -94,22 +99,26 @@ def MeChart_Optimization(MerChatPage):
     mechartdatas = MerChatPage
     dateslist = re.findall('clientId":(.*?)},{', mechartdatas)
     for i in dateslist:
-        dateslist = []
-        year = Get_year(i)
-        mouth = Get_mouth(i)
-        name = Get_name(i)
-        firstcontact = Get_firstcontact(i)
-        lastcontact = Get_lastcontact(i)
-        custmorLable = Get_Label(i)
-        shopName = Get_Shopname(i)
-        branchName = Get_branchName(i)
-        dateslist.append(year)
-        dateslist.append(mouth)
-        dateslist.append(name)
-        dateslist.append(firstcontact)
-        dateslist.append(lastcontact)
-        dateslist.append(custmorLable)
-        dateslist.append(shopName)
-        dateslist.append(branchName)
-        merchatDict[i] = dateslist
+        print(i)
+    for strl in dateslist:
+        valueslist = []
+        year = Get_year(strl)
+        print(year)
+        mouth = Get_mouth(strl)
+        name = Get_name(strl)
+        firstcontact = Get_firstcontact(strl)
+        lastcontact = Get_lastcontact(strl)
+        custmorLable = Get_Label(strl)
+        shopName = Get_Shopname(strl)
+        branchName = Get_branchName(strl)
+        valueslist.append(year)
+        valueslist.append(mouth)
+        valueslist.append(name)
+        valueslist.append(firstcontact)
+        valueslist.append(lastcontact)
+        valueslist.append(custmorLable)
+        valueslist.append(shopName)
+        valueslist.append(branchName)
+        merchatDict[year] = valueslist
+        
     return merchatDict

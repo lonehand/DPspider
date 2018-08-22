@@ -52,6 +52,7 @@ def judge_col(Data):
             print(i,"已更新")
         else:
             pass
+        
     os.remove('./Report/cicheng.xls')
     excel_copy.save('./Report/cicheng.xls')
     return 1
