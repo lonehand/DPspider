@@ -5,7 +5,6 @@ import time
 
 TimeNow = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())[10:]
 
-
 null = 0
 false = 0
 num = 0
@@ -20,9 +19,6 @@ DataStructure = {}
 # 口碑字典
 merchatDict = {}
 
-
-
-
 # ++++++++++++++++ 流量数据+++++++++++++++
 def Getlist(data):
     try:
@@ -31,7 +27,6 @@ def Getlist(data):
     except Exception:
         return '无'
 
-# 流量数据爬取
 def DataOptimization(ScaleResponse, QualityResponse):
     try:
         global num
@@ -61,64 +56,50 @@ def DataOptimization(ScaleResponse, QualityResponse):
 
 # ++++++++++++++++++++++++++口碑数据+++++++++++++++++++++++
 def Get_year(strl):
-    if strl == '':
-        return '无记录'
-    else:
+    if strl != '':
         year = int(str(re.search('lastContact":"(.*?)","', strl).group(1))[:4])
-        return year
+        return year        
+    else:
+        return '无记录'
 
-def Get_mouth(strl):
-    result = re.search('lastContact":"(.*?)","', strl).group(1)
-    return int(str(result)[5:7])
 
-def Get_name(strl):
-    result = re.search('clientName":"(.*?)","', strl)
-    return result
+# def Get_mouth(strl):
+#     result = re.search('lastContact":"(.*?)","', strl).group(1)
+#     return int(str(result)[5:7])
 
-def Get_firstcontact(strl):
-    result = re.search('firstContact":"(.*?)","', strl)
-    return result
+# def Get_name(strl):
+#     result = re.search('clientName":"(.*?)","', strl)
+#     return result
 
-def Get_lastcontact(strl):
-    result = re.search('lastContact":"(.*?)","', strl)
-    return result
+# def Get_firstcontact(strl):
+#     result = re.search('firstContact":"(.*?)","', strl)
+#     return result
 
-def Get_Label(strl):
-    result = re.search('labelName":"(.*?)","', strl)
-    return result
+# def Get_lastcontact(strl):
+#     result = re.search('lastContact":"(.*?)","', strl)
+#     return result
 
-def Get_Shopname(strl):
-    result = re.search('shopName":"(.*?)","', strl)
-    return result
+# def Get_Label(strl):
+#     result = re.search('labelName":"(.*?)","', strl)
+#     return result
 
-def Get_branchName(strl):
-    result = re.search('branchName":"(.*?)","', strl)
-    return result
+# def Get_Shopname(strl):
+#     result = re.search('shopName":"(.*?)","', strl)
+#     return result
+
+# def Get_branchName(strl):
+#     result = re.search('branchName":"(.*?)","', strl)
+#     return result
 
 def MeChart_Optimization(MerChatPage):
     mechartdatas = MerChatPage
     dateslist = re.findall('clientId":(.*?)},{', mechartdatas)
-    for i in dateslist:
-        print(i)
+    # for i in dateslist:
+    #     print(i)
     for strl in dateslist:
-        valueslist = []
+        # valueslist = []
         year = Get_year(strl)
         print(year)
-        mouth = Get_mouth(strl)
-        name = Get_name(strl)
-        firstcontact = Get_firstcontact(strl)
-        lastcontact = Get_lastcontact(strl)
-        custmorLable = Get_Label(strl)
-        shopName = Get_Shopname(strl)
-        branchName = Get_branchName(strl)
-        valueslist.append(year)
-        valueslist.append(mouth)
-        valueslist.append(name)
-        valueslist.append(firstcontact)
-        valueslist.append(lastcontact)
-        valueslist.append(custmorLable)
-        valueslist.append(shopName)
-        valueslist.append(branchName)
-        merchatDict[year] = valueslist
+ 
         
     return merchatDict
