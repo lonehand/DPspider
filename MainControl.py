@@ -11,6 +11,5 @@ from Spider_edp import dpspider
 from svc_Edp import svc
 
 if __name__ == '__main__':
-    Data = dpspider.spidermain()
-    # report.judge_col(Data)
-
+    result = dpspider.spidermain()
+    report.judge_col(result)

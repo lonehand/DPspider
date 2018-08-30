@@ -14,13 +14,21 @@ ChromeOptions = webdriver.ChromeOptions()
 ChromeOptions.add_argument("disable-infobars")
 
 # 账号与密码
+accountdic = {
+    'meiruitf':['MeiruiTF', 'cdmeirui123', '8352512'],
+    'cdjianli':['cdjianli', 'cdjianli123', '']
+    }
+
+# 报表数据字典
+resultList = []
+
 Account = ["meiruiTF", "cdjianli", "bjykyl", "cicheng"]
 Password = ["cdmeirui123", "cdjianli123", "ykyl180225", "71815igm"]
 
 # 伪装浏览器头
 header = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-    "Accept-Encoding": "gzip, deflate",
+    "Accept-Encoding": "gzip, deflate, br",
     "Accept-Language": "zh-CN,zh;q=0.9",
     "Connection": "keep-alive",
     "Host": "e.dianping.com",
@@ -30,7 +38,7 @@ header = {
 
 
 # 登陆网址
-LoginUrl = 'https://epassport.meituan.com/account/unitivelogin?bg_source=2&service=dpmerchantlogin&feconfig=dpmerchantlogin&leftBottomLink=https://e.dianping.com/shopaccount/phoneRegisterAccount&continue=https://e.dianping.com/shopaccount/login/setedper%3FtargetUrl=https%3A%2F%2Fe.dianping.com%2Fshopportal%2Fpc%2Fnewindex'
+LoginUrl = 'https://e.dianping.com'
 
 # 流量数据接口
 TrafficScale = "http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=8352512&tab=0&device=1"
@@ -52,11 +60,12 @@ def Get_CookeandSession(target):  # 请求商 家后台
         ChromeBrowser = webdriver.Chrome(options=ChromeOptions)
         RowAction = ActionChains(ChromeBrowser)
         ChromeBrowser.get(target)
+        ChromeBrowser.switch_to.frame(0)
         WebDriverWait(ChromeBrowser, 5).until(lambda ChromeBrowser: ChromeBrowser.find_elements_by_xpath('//*[@id="login"]'))
         ChromeBrowser.find_element_by_xpath('//*[@id="login"]').click()
-        ChromeBrowser.find_element_by_xpath('//*[@id="login"]').send_keys(Account[1])
+        ChromeBrowser.find_element_by_xpath('//*[@id="login"]').send_keys(Account[0])
         ChromeBrowser.find_element_by_xpath('//*[@id="password"]').click()
-        ChromeBrowser.find_element_by_xpath('//*[@id="password"]').send_keys(Password[1])
+        ChromeBrowser.find_element_by_xpath('//*[@id="password"]').send_keys(Password[0])
         ChromeBrowser.find_element_by_xpath('//*[@id="login-form"]/button').click()
         WebDriverWait(ChromeBrowser, 5).until(lambda ChromeBrowser: ChromeBrowser.find_element_by_xpath('//*[@id="yodaBox"]'))
         ScrollBar = ChromeBrowser.find_element_by_xpath('//*[@id="yodaBox"]')
@@ -69,39 +78,35 @@ def Get_CookeandSession(target):  # 请求商 家后台
                 RowAction.release()
         RowAction.perform()
         WebDriverWait(ChromeBrowser, 10).until(lambda ChromeBrowser: ChromeBrowser.find_element_by_xpath('/html/body/div[2]/div/div[1]/div[4]/div/div[2]/ul/li[3]')).click()
+        time.sleep(2)
+        IndexResponse.headers.clear()
         IndexCookies = ChromeBrowser.get_cookies()
         return IndexCookies
     except Exception as errorinfo:
         return errorinfo
 
 # 获取网页结构
-def Get_Data(targeturl, IndexCookies):
+def Get_Data(targeturl, res):
+    result = res.get(targeturl)
+    return result.text
+
+# 获取带cookies的session对象
+def get_res(IndexCookies):
     for Cookies in IndexCookies:
         IndexResponse.cookies.set(
             Cookies['name'], Cookies['value']
         ) 
-    result = IndexResponse.get(targeturl)
-    return result.text
-
+    return IndexResponse
 
 # 主函数
 def spidermain():  # 主函数
-
     IndexCookies = Get_CookeandSession(LoginUrl)
-    ScaleResponse = Get_Data(TrafficScale, IndexCookies)
-    QualityResponse = Get_Data(TrafiicQuality, IndexCookies)
-    print(ScaleResponse)
-    print(QualityResponse)
-    # MerChatResponse = Get_Data(MerChat_api, IndexCookies)
-    # MerchatDatas = MeChart_Optimization(MerChatResponse)
+    res = get_res(IndexCookies)
+    ScaleResponse = Get_Data(TrafficScale, res)
+    QualityResponse = Get_Data(TrafiicQuality, res)
     TrafficDatas = DataOptimization(ScaleResponse, QualityResponse)
+    MerChatResponse = Get_Data(MerChat_api, res)
+    MerchatDatas = MeChart_Optimization(MerChatResponse)
     return TrafficDatas
-    # for key in TrafficDatas:
-    #     print(key, ":", TrafficDatas[key])
-
-
-
-
-
 
 

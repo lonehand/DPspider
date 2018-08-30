@@ -9,15 +9,15 @@ null = 0
 false = 0
 num = 0
 
-#流量列表
+#流量数据结构
 values = []
 dates = ''
-
-# 流量字典
 DataStructure = {}
 
-# 口碑字典
+# 口碑数据结构
 merchatDict = {}
+chatvalues = []
+
 
 # ++++++++++++++++ 流量数据+++++++++++++++
 def Getlist(data):
@@ -27,6 +27,7 @@ def Getlist(data):
     except Exception:
         return '无'
 
+# ++++++++++++++++ 流量数据 ++++++++++++++++++
 def DataOptimization(ScaleResponse, QualityResponse):
     try:
         global num
@@ -55,51 +56,44 @@ def DataOptimization(ScaleResponse, QualityResponse):
     return DataStructure
 
 # ++++++++++++++++++++++++++口碑数据+++++++++++++++++++++++
-def Get_year(strl):
-    if strl != '':
-        year = int(str(re.search('lastContact":"(.*?)","', strl).group(1))[:4])
-        return year        
-    else:
-        return '无记录'
 
-
-# def Get_mouth(strl):
-#     result = re.search('lastContact":"(.*?)","', strl).group(1)
-#     return int(str(result)[5:7])
-
-# def Get_name(strl):
-#     result = re.search('clientName":"(.*?)","', strl)
-#     return result
-
-# def Get_firstcontact(strl):
-#     result = re.search('firstContact":"(.*?)","', strl)
-#     return result
-
-# def Get_lastcontact(strl):
-#     result = re.search('lastContact":"(.*?)","', strl)
-#     return result
-
-# def Get_Label(strl):
-#     result = re.search('labelName":"(.*?)","', strl)
-#     return result
-
-# def Get_Shopname(strl):
-#     result = re.search('shopName":"(.*?)","', strl)
-#     return result
-
-# def Get_branchName(strl):
-#     result = re.search('branchName":"(.*?)","', strl)
-#     return result
+def Get_MeChartData(chatDataList):
+    global chatvalues
+    chatvalues = []
+    for info in chatDataList:
+        chatvalues = []
+        try:
+            timedata = re.search('lastContact":"(.*?)","us', info).group(1)
+            year = int(timedata[:4])
+            mounth = int(timedata[5:7])
+            nick = re.search('clientName":"(.*?)","ph', info).group(1)
+            firsttalk = re.search('firstContact":"(.*?)","la', info).group(1)
+            lasttalkymd = timedata[0:10]
+            lasttalkhms = timedata[11:19]
+            label = re.search('"labelName":"(.*?)"}', info).group(1)
+            shop = re.search('shopName":"(.*?)","bran', info).group(1)
+            chatvalues.append(year)
+            chatvalues.append(mounth)
+            chatvalues.append(nick)
+            chatvalues.append(firsttalk)
+            chatvalues.append(lasttalkymd)
+            chatvalues.append(lasttalkhms)
+            chatvalues.append(label)
+            chatvalues.append(shop)
+            merchatDict[nick] = chatvalues
+        except:
+            continue
+    return chatvalues
 
 def MeChart_Optimization(MerChatPage):
-    mechartdatas = MerChatPage
-    dateslist = re.findall('clientId":(.*?)},{', mechartdatas)
-    # for i in dateslist:
-    #     print(i)
-    for strl in dateslist:
-        # valueslist = []
-        year = Get_year(strl)
-        print(year)
- 
-        
+    try:
+        chatInfo = re.search('"records":(.*?)}]},"errorMsg"', MerChatPage).group(1)
+        chatData = chatInfo[1:-1].replace('},', '&')
+        chatDataList = chatData.split('&')
+        try:
+            Get_MeChartData(chatDataList)
+        except Exception as e:
+            return e
+    except Exception as e:
+        return e
     return merchatDict

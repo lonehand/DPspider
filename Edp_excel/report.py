@@ -10,16 +10,24 @@ from xlutils.copy import copy
 today = datetime.date.today()
 year = int(str(today)[:4])
 mouth = int(str(today)[5:7])
-
 workbook_read = xlrd.open_workbook('./Report/cicheng.xls', formatting_info=True)
 sheet_read = workbook_read.sheet_by_name("流量数据")
 excel_copy = copy(workbook_read)
 sheet_copy = excel_copy.get_sheet('流量数据')
 booklen = sheet_read.nrows
 
-# # 流量数据
-# flowfile = pandas.DataFrame(pandas.read_excel('./Report/cicheng.xlsx', sheetname = '流量数据'))
-# lastnum = int(flowfile.shape[0])-1
+# 样式
+# def datastyle(name, height,color, bold=False):
+#     style = xlwt.XFStyle()  # 初始化样式
+#     font = xlwt.Font()
+#     font.name = name
+#     font.colour_index = color
+#     font.height = height
+#     style.font = font
+#     alignment = xlwt.Alignment()
+#     alignment.horz = color
+#     style.alignment = alignment
+#     return style
 
 def Get_yesterday(today):
     onedaydelay = datetime.timedelta(days=1)
@@ -53,7 +61,6 @@ def judge_col(Data):
         else:
             pass
         
-    os.remove('./Report/cicheng.xls')
-    excel_copy.save('./Report/cicheng.xls')
-    return 1
+    os.remove(r'./Report/cicheng.xls')
+    excel_copy.save(r'./Report/cicheng.xls')
 
