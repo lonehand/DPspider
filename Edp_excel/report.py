@@ -4,7 +4,6 @@ import datetime
 import os
 
 import xlrd
-import xlwt
 from xlutils.copy import copy
 
 today = datetime.date.today()
@@ -29,15 +28,18 @@ booklen = sheet_read.nrows
 #     style.alignment = alignment
 #     return style
 
+
 def Get_yesterday(today):
     onedaydelay = datetime.timedelta(days=1)
     yesterday = today - onedaydelay
     return yesterday
 
+
 def Get_lastdate(sheet_read):
     lastdates = int(sheet_read.cell_value(booklen-1, 2))
     lastdate = xlrd.xldate.xldate_as_datetime(lastdates, 0)
     return lastdate
+
 
 def judge_col(Data):
     listlen = booklen
@@ -51,16 +53,24 @@ def judge_col(Data):
             Datalist.append(datetime.datetime.strptime(i, "%Y-%m-%d"))
             Datalist.append(int(Data[i][0]))
             Datalist.append(int(Data[i][1]))
-            Datalist.append(float('%.2f' %float(Data[i][2])))
-            Datalist.append(float('%.2f' %float(Data[i][3])))
+            Datalist.append(float('%.2f' % float(Data[i][2])))
+            Datalist.append(float('%.2f' % float(Data[i][3])))
             for title in range(0, 7):
                 sheet_copy.write(listlen, title, Datalist[num])
                 num += 1
             listlen += 1
-            print(i,"已更新")
+            print(i, "已更新")
         else:
             pass
-        
     os.remove(r'./Report/cicheng.xls')
     excel_copy.save(r'./Report/cicheng.xls')
 
+
+def chat_col(Data):
+    listen = 1
+    for i in Data:
+        for i in range(0, 8):
+            pass
+
+
+        

@@ -9,7 +9,7 @@ null = 0
 false = 0
 num = 0
 
-#流量数据结构
+# 流量数据结构
 values = []
 dates = ''
 DataStructure = {}
@@ -22,12 +22,15 @@ chatvalues = []
 # ++++++++++++++++ 流量数据+++++++++++++++
 def Getlist(data):
     try:
-        result = data[1:-1].replace('"','').split(",")
+        result = data[1:-1].replace('"', '').split(",")
         return result
     except Exception:
         return '无'
 
+
 # ++++++++++++++++ 流量数据 ++++++++++++++++++
+
+
 def DataOptimization(ScaleResponse, QualityResponse):
     try:
         global num
@@ -55,7 +58,9 @@ def DataOptimization(ScaleResponse, QualityResponse):
         print(e)
     return DataStructure
 
+
 # ++++++++++++++++++++++++++口碑数据+++++++++++++++++++++++
+
 
 def Get_MeChartData(chatDataList):
     global chatvalues
@@ -81,17 +86,21 @@ def Get_MeChartData(chatDataList):
             chatvalues.append(label)
             chatvalues.append(shop)
             merchatDict[nick] = chatvalues
-        except:
+        except Exception as error:
+            print(error)
             continue
-    return chatvalues
+    return merchatDict
+
 
 def MeChart_Optimization(MerChatPage):
+    merchatDict = {}
     try:
-        chatInfo = re.search('"records":(.*?)}]},"errorMsg"', MerChatPage).group(1)
+        chatInfo = re.search('"records":(.*?)}]},"errorMsg"',
+                             MerChatPage).group(1)
         chatData = chatInfo[1:-1].replace('},', '&')
         chatDataList = chatData.split('&')
         try:
-            Get_MeChartData(chatDataList)
+            merchatDict = Get_MeChartData(chatDataList)
         except Exception as e:
             return e
     except Exception as e:
