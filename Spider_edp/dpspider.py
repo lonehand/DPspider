@@ -132,3 +132,8 @@ def Getchatdata(res):
     MerChatResponse = Get_Data(MerChat_api, res)
     MerchatDatas = MeChart_Optimization(MerChatResponse)
     return MerchatDatas
+
+
+# 预约数据
+def GetAppointresult(res):
+    pass

@@ -29,8 +29,6 @@ def Getlist(data):
 
 
 # ++++++++++++++++ 流量数据 ++++++++++++++++++
-
-
 def DataOptimization(ScaleResponse, QualityResponse):
     try:
         global num
@@ -60,8 +58,6 @@ def DataOptimization(ScaleResponse, QualityResponse):
 
 
 # ++++++++++++++++++++++++++口碑数据+++++++++++++++++++++++
-
-
 def Get_MeChartData(chatDataList):
     global chatvalues
     chatvalues = []
@@ -73,21 +69,17 @@ def Get_MeChartData(chatDataList):
             mounth = int(timedata[5:7])
             nick = re.search('clientName":"(.*?)","ph', info).group(1)
             firsttalk = re.search('firstContact":"(.*?)","la', info).group(1)
-            lasttalkymd = timedata[0:10]
-            lasttalkhms = timedata[11:19]
             label = re.search('"labelName":"(.*?)"}', info).group(1)
             shop = re.search('shopName":"(.*?)","bran', info).group(1)
             chatvalues.append(year)
             chatvalues.append(mounth)
             chatvalues.append(nick)
             chatvalues.append(firsttalk)
-            chatvalues.append(lasttalkymd)
-            chatvalues.append(lasttalkhms)
+            chatvalues.append(timedata)
             chatvalues.append(label)
             chatvalues.append(shop)
             merchatDict[nick] = chatvalues
         except Exception as error:
-            print(error)
             continue
     return merchatDict
 

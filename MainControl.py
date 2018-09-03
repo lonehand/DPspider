@@ -14,5 +14,6 @@ if __name__ == '__main__':
     res = dpspider.Get_CookeandSession(LoginUrl)
     flowresult = dpspider.Getflowdata(res)
     chatreuslt = dpspider.Getchatdata(res)
-    report.judge_col(flowresult)
-    report.chat_col(chatreuslt)
+    appointmentresult = dpspider.GetAppointresult(res)
+    report.Flowupdate(flowresult)
+    report.ChatUpdate(chatreuslt)
