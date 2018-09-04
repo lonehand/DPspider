@@ -17,3 +17,4 @@ if __name__ == '__main__':
     appointmentresult = dpspider.GetAppointresult(res)
     report.Flowupdate(flowresult)
     report.ChatUpdate(chatreuslt)
+    report.AppointUpdate(appointmentresult)

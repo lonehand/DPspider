@@ -9,6 +9,7 @@ filename = ['Report/cicheng.xlsx']
 WorkBook = load_workbook(filename[0])
 FlowSheet = WorkBook['流量数据']
 ChatSheet = WorkBook['咨询明细']
+APPSheet = WorkBook['订单中心']
 
 
 # 获得最大行数
@@ -29,15 +30,16 @@ def Get_yesterday():
 def Flowupdate(Data):
     YesterDay = Get_yesterday()
     MaxLen = GetBooklen(FlowSheet)
-    LastDay = FlowSheet.cell(MaxLen, 3).value.strftime(r'%Y-%m-%d')
+    print(MaxLen)
+    LastDay = FlowSheet.cell(MaxLen, 3).value.strftime('%Y-%m-%d')
     if YesterDay == LastDay:
         pass
     else:
         for data in Data:
             if data > LastDay:
                 FlowSheet.append([
-                    '=YEAR(C%s)' % MaxLen,
-                    '=MONTH(C%s)' % MaxLen,
+                    '=YEAR(C%s)' % str(MaxLen),
+                    '=MONTH(C%s)' % str(MaxLen),
                     datetime.datetime.strptime(data, r"%Y-%m-%d"),
                     int(Data[data][0]),
                     int(Data[data][1]),
@@ -58,4 +60,12 @@ def ChatUpdate(Data):
             num += 1
     WorkBook.save('Report/cicheng.xlsx')
 
+
 # 订单中心
+def AppointUpdate(appointmentresult):
+    for data in appointmentresult:
+        num = 0
+        for col in range(1, 10):
+            APPSheet.cell(int(data), col, appointmentresult[data][num])
+            num += 1
+    WorkBook.save('Report/cicheng.xlsx')

@@ -80,6 +80,7 @@ def Get_MeChartData(chatDataList):
             chatvalues.append(shop)
             merchatDict[nick] = chatvalues
         except Exception as error:
+            print(error)
             continue
     return merchatDict
 
@@ -98,3 +99,11 @@ def MeChart_Optimization(MerChatPage):
     except Exception as e:
         return e
     return merchatDict
+
+
+def AppointMent_Optimization(AppointMenttree):
+    Tdata = re.search(
+        '"records":\[(.*?)\],"sortAsc":', AppointMenttree, re.S
+        ).group(1).replace(' ', '').replace('},{', '?')[1:-1]
+    result = Tdata.split('?')
+    return result

@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
+import re
+import time
+import datetime
 
 import requests
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
-from Spider_edp.datachange import MeChart_Optimization, DataOptimization
+
+from Spider_edp.datachange import DataOptimization
+from Spider_edp.datachange import MeChart_Optimization
+from Spider_edp.datachange import AppointMent_Optimization
+
 
 # 浏览器设置
 ChromeOptions = webdriver.ChromeOptions()
@@ -17,7 +24,8 @@ accountdic = {
 }
 
 # 报表数据字典
-resultList = []
+Appointresult = []
+Appintdict = {}
 
 Account = ["meiruiTF", "cdjianli", "bjykyl", "cicheng"]
 Password = ["cdmeirui123", "cdjianli123", "ykyl180225", "71815igm"]
@@ -42,14 +50,17 @@ header = {
 
 # 流量数据接口
 TrafficScale = '''
-http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=8352512&tab=0&device=1
+http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=73082729&tab=0&device=1
 '''
 
 # 流量质量接口
-TrafiicQuality = 'http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=8352512&tab=1&device=1'
+TrafiicQuality = 'http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=73082729&tab=1&device=1'
 
 # 口碑管理接口
 MerChat_api = 'https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000'
+
+# 订单中心接口
+appointment_api = 'https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?display=2&shopId=73082729&page=%s'
 
 # 登陆后的session（）
 IndexResponse = requests.session()
@@ -71,12 +82,12 @@ def Get_CookeandSession(target):  # 请求商 家后台
             '//*[@id="login"]').click()
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="login"]').send_keys(
-            Account[0])
+            Account[1])
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="password"]').click()
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="password"]').send_keys(
-            Password[0])
+            Password[1])
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="login-form"]/button').click()
         WebDriverWait(ChromeBrowser, 5).until(
@@ -112,11 +123,23 @@ def Get_Data(targeturl, res):
     return result.text
 
 
+# 获取预约网页结构
+def Get_appiont_Data(targeturl, res, page):
+    result = res.get(targeturl % page)
+    return result.text
+
+
 # 获取带cookies的session对象
 def get_res(IndexCookies):
     for Cookies in IndexCookies:
         IndexResponse.cookies.set(Cookies['name'], Cookies['value'])
     return IndexResponse
+
+
+# 获取预约最大页数
+def get_maxpage(htmltree):
+    max_page = re.search('"pageCount":(.*?),"pageSize"', htmltree).group(1)
+    return max_page
 
 
 # 获取流量
@@ -134,6 +157,56 @@ def Getchatdata(res):
     return MerchatDatas
 
 
-# 预约数据
+# 预约数据 放慢一秒
+def Get_appdatalist(data):
+    result = []
+    addtime = re.search(
+        '"addTime":"(.*?)","arriveStatus"', data
+        ).group(1).replace('T', ' ')
+    userfrom = re.search(
+        '"orderSourceVal":"(.*?)","orderTime"', data
+        ).group(1)
+    usernick = re.search(
+        '"customerName":"(.*?)","merchantComment', data
+        ).group(1)
+    phone = re.search(
+        'phoneNo":"(.*?)","productId', data
+        ).group(1)
+    comment = re.search(
+        'comment":"(.*?)","count"', data
+        ).group(1)
+    status = re.search(
+        '"arriveStatusVal":"(.*?)","comment"', data
+        ).group(1)
+    year = addtime[:10]
+    clock = addtime[11:19]
+    result.append(int(year[:4]))
+    result.append(int(year[5:7]))
+    result.append(year)
+    result.append(clock)
+    result.append(str(userfrom))
+    result.append(str(usernick))
+    result.append(str(phone))
+    if comment != '':
+        result.append((comment))
+    else:
+        result.append('无')
+    result.append(status)
+    return result
+
+
 def GetAppointresult(res):
-    pass
+    page = 1
+    num = 2
+    Appintdict = {}
+    AppointMenttree = Get_appiont_Data(appointment_api, res, page)
+    MaxPage = int(get_maxpage(AppointMenttree))
+    for page in range(1, MaxPage + 1):
+        time.sleep(1)
+        Appointtree = Get_appiont_Data(appointment_api, res, str(page))
+        AppointData = AppointMent_Optimization(Appointtree)
+        for data in AppointData:
+            Ddata = Get_appdatalist(data)
+            Appintdict[num] = Ddata
+            num += 1
+    return Appintdict
