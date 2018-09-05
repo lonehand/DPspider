@@ -22,7 +22,9 @@ def GetBooklen(sheetname):
 def Get_yesterday():
     today = datetime.datetime.now()
     onedaydelay = datetime.timedelta(days=1)
-    yesterday = (today - onedaydelay).strftime(r'%Y-%m-%d')
+    yesterday = (
+        today - onedaydelay
+        ).strftime(r'%Y-%m-%d')
     return yesterday
 
 
@@ -69,3 +71,7 @@ def AppointUpdate(appointmentresult):
             APPSheet.cell(int(data), col, appointmentresult[data][num])
             num += 1
     WorkBook.save('Report/cicheng.xlsx')
+
+# 线上销售数据
+def SaleOnlineUpdate(SaleOnlineresult):
+    pass

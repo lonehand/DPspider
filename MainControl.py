@@ -15,6 +15,8 @@ if __name__ == '__main__':
     flowresult = dpspider.Getflowdata(res)
     chatreuslt = dpspider.Getchatdata(res)
     appointmentresult = dpspider.GetAppointresult(res)
+    SaleOnlineresult = dpspider.GetSaleOnlineresult(res)
     report.Flowupdate(flowresult)
     report.ChatUpdate(chatreuslt)
     report.AppointUpdate(appointmentresult)
+    report.SaleOnlineUpdate(SaleOnlineresult)

@@ -57,17 +57,22 @@ http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&s
 TrafiicQuality = 'http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=73082729&tab=1&device=1'
 
 # 口碑管理接口
-MerChat_api = 'https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000'
+MerChat_api = r'https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000'
 
 # 订单中心接口
 appointment_api = 'https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?display=2&shopId=73082729&page=%s'
+
+# 线上销售数据（一个月+目前）
+SaleOnline_api = '''
+https://e.dianping.com/ktv/dzbook/trade/api/queryorderlist.wbc?beginTime=%s&endTime=%s&page=1&pageSize=500&queryType=3&bizname=medicalbeautyprepay
+''' % (starttime, endtime)
 
 # 登陆后的session（）
 IndexResponse = requests.session()
 
 
 # session登陆商家后台模块，动态cookies
-# 请求商家后台，并提供相应返回 session()
+# 请求商家后台，并提供相应返回 session()pI
 def Get_CookeandSession(target):  # 请求商 家后台
     try:
         ChromeBrowser = webdriver.Chrome(options=ChromeOptions)
@@ -210,3 +215,27 @@ def GetAppointresult(res):
             Appintdict[num] = Ddata
             num += 1
     return Appintdict
+
+
+# 线上订单数据
+def Get_YesterMonth(today):
+    return datetime.date(
+        today.year - (today.month == 1), today.month - 1 or 12, 1
+        )
+
+
+def GetStartandEndDate():
+    today = datetime.datetime.today().strftime("%Y-%m-%d-%H-%M-%S")
+    YesterMonth = Get_YesterMonth(today)
+    starttime = YesterMonth.strftime("%Y-%m-%d-%H-%M-%S")
+
+
+def Get_SaleTree(res, starttime, endtime):
+    starttime, endtime = GetStartandEndDate()
+    pass
+
+
+def GetSaleOnlineresult(res):
+    SaleOnlinetree = Get_SaleTree(res, starttime, endtime)
+    pass
+
