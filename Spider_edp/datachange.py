@@ -80,7 +80,7 @@ def Get_MeChartData(chatDataList):
             chatvalues.append(shop)
             merchatDict[nick] = chatvalues
         except Exception as error:
-            print(error)
+            error
             continue
     return merchatDict
 
@@ -107,3 +107,18 @@ def AppointMent_Optimization(AppointMenttree):
         ).group(1).replace(' ', '').replace('},{', '?')[1:-1]
     result = Tdata.split('?')
     return result
+
+
+def SaleOnline_Optimaization(SaleOnlinetree):
+    salelist = []
+    saledic = {}
+    SaleData = re.search('"orderList":\[(.*?)\]}]},"code":', SaleOnlinetree).group(1)[1:-1].replace('},{', '?').split('?')
+    for data in SaleData:
+        saletime = re.search('"verifyTime":"(.*?),"mobile"', data).group(1)
+        productname = re.search('"productItemName":"(.*?)","shopId"', data).group(1)
+        userphoen = re.search('"mobile":"(.*?)","availableCouponCount', data).group(1)
+        shopname = re.search('"shopName":"(.*?)","addTime', data).group(1)
+
+
+
+

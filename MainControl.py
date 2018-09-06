@@ -4,7 +4,6 @@
 # __project name__ : "dianping_spider"
 # __CODE__: Python3
 
-from Edp_excel import report
 from Spider_edp import dpspider
 
 LoginUrl = 'https://e.dianping.com'
@@ -16,7 +15,7 @@ if __name__ == '__main__':
     chatreuslt = dpspider.Getchatdata(res)
     appointmentresult = dpspider.GetAppointresult(res)
     SaleOnlineresult = dpspider.GetSaleOnlineresult(res)
-    report.Flowupdate(flowresult)
-    report.ChatUpdate(chatreuslt)
-    report.AppointUpdate(appointmentresult)
-    report.SaleOnlineUpdate(SaleOnlineresult)
+    # report.Flowupdate(flowresult)
+    # report.ChatUpdate(chatreuslt)
+    # report.AppointUpdate(appointmentresult)
+    # report.SaleOnlineUpdate(SaleOnlineresult)

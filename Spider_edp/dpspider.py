@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
+import datetime
 import re
 import time
-import datetime
 
+import arrow
 import requests
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 
+from Spider_edp.datachange import AppointMent_Optimization
 from Spider_edp.datachange import DataOptimization
 from Spider_edp.datachange import MeChart_Optimization
-from Spider_edp.datachange import AppointMent_Optimization
+from Spider_edp.datachange import SaleOnline_Optimaization
 
 
 # 浏览器设置
@@ -63,9 +65,7 @@ MerChat_api = r'https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSiz
 appointment_api = 'https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?display=2&shopId=73082729&page=%s'
 
 # 线上销售数据（一个月+目前）
-SaleOnline_api = '''
-https://e.dianping.com/ktv/dzbook/trade/api/queryorderlist.wbc?beginTime=%s&endTime=%s&page=1&pageSize=500&queryType=3&bizname=medicalbeautyprepay
-''' % (starttime, endtime)
+SaleOnline_api = 'https://e.dianping.com/ktv/dzbook/trade/api/queryorderlist.wbc?&beginTime=%s&endTime=%s&page=1&pageSize=1000&queryType=3&bizname=medicalbeautyprepay'
 
 # 登陆后的session（）
 IndexResponse = requests.session()
@@ -147,7 +147,7 @@ def get_maxpage(htmltree):
     return max_page
 
 
-# 获取流量
+# =======================获取流量==================================
 def Getflowdata(res):  # 主函数
     ScaleResponse = Get_Data(TrafficScale, res)
     QualityResponse = Get_Data(TrafiicQuality, res)
@@ -155,14 +155,14 @@ def Getflowdata(res):  # 主函数
     return TrafficDatas
 
 
-# 获取口碑
+# ========================获取口碑================================
 def Getchatdata(res):
     MerChatResponse = Get_Data(MerChat_api, res)
     MerchatDatas = MeChart_Optimization(MerChatResponse)
     return MerchatDatas
 
 
-# 预约数据 放慢一秒
+# ======================预约数据 放慢一秒===========================
 def Get_appdatalist(data):
     result = []
     addtime = re.search(
@@ -200,6 +200,7 @@ def Get_appdatalist(data):
     return result
 
 
+# ==========================预约中心==================================
 def GetAppointresult(res):
     page = 1
     num = 2
@@ -217,25 +218,35 @@ def GetAppointresult(res):
     return Appintdict
 
 
-# 线上订单数据
+# ========================线上订单数据================================
 def Get_YesterMonth(today):
     return datetime.date(
         today.year - (today.month == 1), today.month - 1 or 12, 1
         )
 
 
+# 开始与结束日期的13位时间戳
 def GetStartandEndDate():
-    today = datetime.datetime.today().strftime("%Y-%m-%d-%H-%M-%S")
+    today = datetime.datetime.today()
     YesterMonth = Get_YesterMonth(today)
-    starttime = YesterMonth.strftime("%Y-%m-%d-%H-%M-%S")
+    starttime = YesterMonth.strftime("%Y-%m-%d %H:%M:%S")
+    endtime = today.strftime("%Y-%m-%d %H:%M:%S")[:10]+" 00:00:00"
+    starttime = time.strptime(starttime, '%Y-%m-%d %H:%M:%S')
+    endtime = time.strptime(endtime, '%Y-%m-%d %H:%M:%S')
+    starttime = arrow.get(starttime).timestamp*1000
+    endtime = arrow.get(endtime).timestamp*1000
+    return starttime, endtime
 
 
+# 获取HtmlTree
 def Get_SaleTree(res, starttime, endtime):
-    starttime, endtime = GetStartandEndDate()
-    pass
+    result = res.get(SaleOnline_api % (str(starttime), str(endtime)))
+    return result.text
 
 
+# 加工返回字典
 def GetSaleOnlineresult(res):
+    starttime, endtime = GetStartandEndDate()
     SaleOnlinetree = Get_SaleTree(res, starttime, endtime)
-    pass
+    SaleOnlineData = SaleOnline_Optimaization(SaleOnlinetree)
 

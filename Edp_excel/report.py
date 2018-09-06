@@ -72,6 +72,5 @@ def AppointUpdate(appointmentresult):
             num += 1
     WorkBook.save('Report/cicheng.xlsx')
 
+
 # 线上销售数据
-def SaleOnlineUpdate(SaleOnlineresult):
-    pass
