@@ -2,6 +2,8 @@
 # CODE - # - OUT
 import re
 import time
+from lxml import etree
+from lxml.html import fromstring, tostring
 
 TimeNow = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())[10:]
 
@@ -110,14 +112,44 @@ def AppointMent_Optimization(AppointMenttree):
 
 
 def SaleOnline_Optimaization(SaleOnlinetree):
-    salelist = []
-    saledic = {}
-    SaleData = re.search('"orderList":\[(.*?)\]}]},"code":', SaleOnlinetree).group(1)[1:-1].replace('},{', '?').split('?')
-    for data in SaleData:
-        saletime = re.search('"verifyTime":"(.*?),"mobile"', data).group(1)
-        productname = re.search('"productItemName":"(.*?)","shopId"', data).group(1)
-        userphoen = re.search('"mobile":"(.*?)","availableCouponCount', data).group(1)
-        shopname = re.search('"shopName":"(.*?)","addTime', data).group(1)
+    saledict = {}
+    htmltree = etree.HTML(SaleOnlinetree)
+    data = htmltree.xpath('//*[@id="consume-detail-list"]/thead')[0]
+    original_html = etree.tostring(data, encoding='utf-8', pretty_print=True, method='html')
+    htmlstr = str(original_html, encoding="utf-8").replace(' ', '').replace('\n', '').replace('-', '0')
+    htmllist = re.findall('<tr>(.*?)</tr>', htmlstr)
+    for data in htmllist[1:]:
+        resultlist = []
+        htmldata = re.findall('<td>(.*?)</td>', data)
+        if htmldata[5] == '0':
+            pass
+        else:
+            htmldata[5] = re.search('<div>团购立减:(.*?)</div>', htmldata[5]).group(1)
+        resultlist.append(int(htmldata[2][:4]))
+        resultlist.append(int(htmldata[2][5:7]))
+        resultlist.append(float(htmldata[4])-float(htmldata[5]))
+        resultlist.append(int(htmldata[0]))
+        resultlist.append(htmldata[1])
+        resultlist.append(htmldata[2][:4]+'/'+htmldata[2][5:7]+'/'+htmldata[2][8:10])
+        resultlist.append(htmldata[2][10:])
+        if htmldata[3][0] != '<':
+            resultlist.append(htmldata[3])
+        else:
+            resultlist.append(re.search('">(.*?)</a>', htmldata[3]).group(1))
+        resultlist.append(float(htmldata[4]))
+        resultlist.append(float(htmldata[5]))
+        resultlist.append(float(htmldata[6]))
+        resultlist.append(htmldata[8])
+        resultlist.append(htmldata[9])
+        saledict[htmldata[0]] = resultlist
+    return saledict
+        
+        
+
+
+
+    
+
 
 
 

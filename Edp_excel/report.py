@@ -4,12 +4,13 @@ import datetime
 from openpyxl import load_workbook
 
 sheet_name = ['流量数据', '咨询明细']
-filename = ['Report/cicheng.xlsx']
+filename = ['Report/meitan.xlsx']
 
 WorkBook = load_workbook(filename[0])
-FlowSheet = WorkBook['流量数据']
+FlowSheet = WorkBook['流量']
 ChatSheet = WorkBook['咨询明细']
-APPSheet = WorkBook['订单中心']
+APPSheet = WorkBook['预约数据']
+SaleSheet = WorkBook['消费数据明细（线上）']
 
 
 # 获得最大行数
@@ -32,7 +33,6 @@ def Get_yesterday():
 def Flowupdate(Data):
     YesterDay = Get_yesterday()
     MaxLen = GetBooklen(FlowSheet)
-    print(MaxLen)
     LastDay = FlowSheet.cell(MaxLen, 3).value.strftime('%Y-%m-%d')
     if YesterDay == LastDay:
         pass
@@ -48,7 +48,7 @@ def Flowupdate(Data):
                     float('%.2f' % float(Data[data][2])),
                     float('%.2f' % float(Data[data][3])),
                 ])
-        WorkBook.save('Report/cicheng.xlsx')
+        WorkBook.save('Report/meitan.xlsx')
 
 
 # 口碑数据管理
@@ -60,7 +60,7 @@ def ChatUpdate(Data):
         for i in range(1, 8):
             ChatSheet.cell(row, i, value=Data[data][num])
             num += 1
-    WorkBook.save('Report/cicheng.xlsx')
+    WorkBook.save('Report/meitan.xlsx')
 
 
 # 订单中心
@@ -70,7 +70,17 @@ def AppointUpdate(appointmentresult):
         for col in range(1, 10):
             APPSheet.cell(int(data), col, appointmentresult[data][num])
             num += 1
-    WorkBook.save('Report/cicheng.xlsx')
+    WorkBook.save('Report/meitan.xlsx')
 
 
 # 线上销售数据
+def SaleOnlineUpdate(SaleOnlineresult):
+    row = 2
+    for data in SaleOnlineresult:
+        num = 0
+        for col in range(1, 14):
+            SaleSheet.cell(row, col, SaleOnlineresult[data][num])
+            num += 1
+        row += 1
+    WorkBook.save('Report/meitan.xlsx')
+

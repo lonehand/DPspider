@@ -3,8 +3,8 @@ import datetime
 import re
 import time
 
-import arrow
 import requests
+from lxml import etree
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -29,8 +29,8 @@ accountdic = {
 Appointresult = []
 Appintdict = {}
 
-Account = ["meiruiTF", "cdjianli", "bjykyl", "cicheng"]
-Password = ["cdmeirui123", "cdjianli123", "ykyl180225", "71815igm"]
+Account = ["meiruiTF", "cdjianli", "bjykyl", "cicheng", 'tongyan88888', 'fenghuangyimei', 'tjsgzx520', 'ieshan23', 'HX73357653', 'deermeike', 'mtzyyzx']
+Password = ["cdmeirui123", "cdjianli123", "ykyl180225", "71815igm", 'tongyan61', 'fhym666', 'tjsgzx2015', '37878jmd', '65787488', '30826rpo', 'meitan666']
 
 # 伪装浏览器头
 header = {
@@ -52,20 +52,20 @@ header = {
 
 # 流量数据接口
 TrafficScale = '''
-http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=73082729&tab=0&device=1
+http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=98380431&tab=0&device=1
 '''
 
 # 流量质量接口
-TrafiicQuality = 'http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=73082729&tab=1&device=1'
+TrafiicQuality = 'http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=98380431&tab=1&device=1'
 
 # 口碑管理接口
-MerChat_api = r'https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000'
+MerChat_api = 'https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000'
 
 # 订单中心接口
-appointment_api = 'https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?display=2&shopId=73082729&page=%s'
+appointment_api = 'https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?display=2&shopId=98380431&page=%s'
 
 # 线上销售数据（一个月+目前）
-SaleOnline_api = 'https://e.dianping.com/ktv/dzbook/trade/api/queryorderlist.wbc?&beginTime=%s&endTime=%s&page=1&pageSize=1000&queryType=3&bizname=medicalbeautyprepay'
+SaleOnline_html = 'https://e.dianping.com/receiptreport/tuangouConsumeDetail?page=%s&selectedBeginDate=%s%%2000:00:00&selectedEndDate=%s%%2000:00:00'
 
 # 登陆后的session（）
 IndexResponse = requests.session()
@@ -87,12 +87,12 @@ def Get_CookeandSession(target):  # 请求商 家后台
             '//*[@id="login"]').click()
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="login"]').send_keys(
-            Account[1])
+            Account[9])
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="password"]').click()
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="password"]').send_keys(
-            Password[1])
+            Password[9])
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="login-form"]/button').click()
         WebDriverWait(ChromeBrowser, 5).until(
@@ -143,6 +143,7 @@ def get_res(IndexCookies):
 
 # 获取预约最大页数
 def get_maxpage(htmltree):
+    print(htmltree)
     max_page = re.search('"pageCount":(.*?),"pageSize"', htmltree).group(1)
     return max_page
 
@@ -229,24 +230,36 @@ def Get_YesterMonth(today):
 def GetStartandEndDate():
     today = datetime.datetime.today()
     YesterMonth = Get_YesterMonth(today)
-    starttime = YesterMonth.strftime("%Y-%m-%d %H:%M:%S")
-    endtime = today.strftime("%Y-%m-%d %H:%M:%S")[:10]+" 00:00:00"
-    starttime = time.strptime(starttime, '%Y-%m-%d %H:%M:%S')
-    endtime = time.strptime(endtime, '%Y-%m-%d %H:%M:%S')
-    starttime = arrow.get(starttime).timestamp*1000
-    endtime = arrow.get(endtime).timestamp*1000
+    starttime = YesterMonth.strftime("%Y-%m-%d %H:%M:%S")[:10]
+    endtime = today.strftime("%Y-%m-%d %H:%M:%S")[:10]
     return starttime, endtime
 
 
 # 获取HtmlTree
 def Get_SaleTree(res, starttime, endtime):
-    result = res.get(SaleOnline_api % (str(starttime), str(endtime)))
+    page = 1
+    result = res.get(
+        SaleOnline_html % (str(page), starttime, endtime)
+        )
     return result.text
+
+
+def Get_MaxPage(SaleOnlinetree):
+    maxpage = 0
+    SaleTree = etree.HTML(SaleOnlinetree)
+    pagelist = SaleTree.xpath('//*[@id="deal-consume-form"]/div/div[3]/div[2]/div[1]/div/div/div/a')
+    for i in pagelist:
+        maxpage += 1
+    return maxpage
 
 
 # 加工返回字典
 def GetSaleOnlineresult(res):
+    SaleOnlineData = {}
     starttime, endtime = GetStartandEndDate()
     SaleOnlinetree = Get_SaleTree(res, starttime, endtime)
-    SaleOnlineData = SaleOnline_Optimaization(SaleOnlinetree)
-
+    maxpage = int(Get_MaxPage(SaleOnlinetree))
+    for page in range(1, maxpage):
+        SaleOnlinetree = res.get(SaleOnline_html % (str(page), starttime, endtime)).text
+        SaleOnlineData.update(SaleOnline_Optimaization(SaleOnlinetree))
+    return SaleOnlineData
