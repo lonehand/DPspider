@@ -143,14 +143,3 @@ def SaleOnline_Optimaization(SaleOnlinetree):
         resultlist.append(htmldata[9])
         saledict[htmldata[0]] = resultlist
     return saledict
-        
-        
-
-
-
-    
-
-
-
-
-

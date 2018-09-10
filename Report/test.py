@@ -12,9 +12,19 @@
 
 # html = 'https://e.dianping.com/receiptreport/tuangouConsumeDetail?page=%s&selectedBeginDate=%s%%2000:00:00&selectedEndDate=%s%%2000:00:00'
 # print(html % ('1','2','3'))
-from openpyxl import load_workbook
-filename = ['meirui.xlsx']
-WorkBook = load_workbook(filename[0])
-FlowSheet = WorkBook['流量']
-print(FlowSheet.max_row)
+import json
+from urllib.parse import urlencode
+postData = {
+    "shopId": 98380431,
+    "star": "3",
+    "projectType": "1",
+    "startDate": "2018-01-01",
+    "endDate": "2018-09-01",
+    "page": 1,
+    "pageSize": 100,
+    "reviewState": "0"
+    }
 
+result = json.dumps(postData)
+
+print(result)

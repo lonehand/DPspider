@@ -4,6 +4,7 @@ import re
 import time
 
 import requests
+from urllib.parse import urlencode
 from lxml import etree
 from selenium import webdriver
 from selenium.webdriver import ActionChains
@@ -30,42 +31,41 @@ Appointresult = []
 Appintdict = {}
 
 Account = ["meiruiTF", "cdjianli", "bjykyl", "cicheng", 'tongyan88888', 'fenghuangyimei', 'tjsgzx520', 'ieshan23', 'HX73357653', 'deermeike', 'mtzyyzx']
-Password = ["cdmeirui123", "cdjianli123", "ykyl180225", "71815igm", 'tongyan61', 'fhym666', 'tjsgzx2015', '37878jmd', '65787488', '30826rpo', 'meitan666']
+Password = ["cdmeirui123", "cdjianli123", "ykyl180225", "71815igm", 'tongyan61', 'fhymfh1234', 'tjsgzx2015', '37878jmd', '65787488', '30826rpo', 'meitan666']
 
 # 伪装浏览器头
 header = {
-    "Accept":
-    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-    "Accept-Encoding":
-    "gzip, deflate, br",
-    "Accept-Language":
-    "zh-CN,zh;q=0.9",
-    "Connection":
-    "keep-alive",
-    "Host":
-    "e.dianping.com",
-    "Referer":
-    "http://e.dianping.com/mda/web/traffic",
-    "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36"
+    "Accept": "application/json, text/javascript, */*; q=0.01",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Language": "zh-CN,zh;q=0.9",
+    "Connection": "keep-alive",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "Host": "e.dianping.com",
+    "Origin": "https://e.dianping.com",
+    "Referer": "https://e.dianping.com/comment/shopreviews/list",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36"
 }
 
 # 流量数据接口
 TrafficScale = '''
-http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=98380431&tab=0&device=1
+http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=8352512&tab=0&device=1
 '''
 
 # 流量质量接口
-TrafiicQuality = 'http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=98380431&tab=1&device=1'
+TrafiicQuality = 'http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=8352512&tab=1&device=1'
 
 # 口碑管理接口
 MerChat_api = 'https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000'
 
 # 订单中心接口
-appointment_api = 'https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?display=2&shopId=98380431&page=%s'
+appointment_api = 'https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?display=2&shopId=8352512&page=%s'
 
 # 线上销售数据（一个月+目前）
 SaleOnline_html = 'https://e.dianping.com/receiptreport/tuangouConsumeDetail?page=%s&selectedBeginDate=%s%%2000:00:00&selectedEndDate=%s%%2000:00:00'
+
+# 体验报告数据接口（post）
+
+Comment_api = "https://e.dianping.com/comment/shopreviews/shopreviewlist"
 
 # 登陆后的session（）
 IndexResponse = requests.session()
@@ -87,12 +87,12 @@ def Get_CookeandSession(target):  # 请求商 家后台
             '//*[@id="login"]').click()
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="login"]').send_keys(
-            Account[9])
+            Account[0])
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="password"]').click()
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="password"]').send_keys(
-            Password[9])
+            Password[0])
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="login-form"]/button').click()
         WebDriverWait(ChromeBrowser, 5).until(
@@ -263,3 +263,27 @@ def GetSaleOnlineresult(res):
         SaleOnlinetree = res.get(SaleOnline_html % (str(page), starttime, endtime)).text
         SaleOnlineData.update(SaleOnline_Optimaization(SaleOnlinetree))
     return SaleOnlineData
+
+
+# +++==================口碑数据###########################
+def Get_CommentTree(res, postData):
+    commenttree = res.get(Comment_api, postData, headers=header)
+    return commenttree
+
+
+def GetCommentResult(res):
+    starttime, endtime = GetStartandEndDate()
+    postData = {
+        "shopId": "8352512",
+        "star": "3",
+        "projectType": "1",
+        "startDate": "2018-08-12",
+        "endDate": "2018-09-10",
+        "page": "1",
+        "pageSize": "10",
+        "reviewState": "0"
+        }
+    # postData = urlencode(postData)
+    # print(postData)
+    CommentTree = Get_CommentTree(res, postData)
+    print(CommentTree)
