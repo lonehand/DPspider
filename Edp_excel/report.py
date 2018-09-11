@@ -11,6 +11,8 @@ FlowSheet = WorkBook['流量']
 ChatSheet = WorkBook['咨询明细']
 APPSheet = WorkBook['预约数据']
 SaleSheet = WorkBook['消费数据明细（线上）']
+CommentSheet = WorkBook['口碑数据']
+CommentSheet_R = WorkBook['回复口碑']
 
 
 # 获得最大行数
@@ -48,7 +50,7 @@ def Flowupdate(Data):
                     float('%.2f' % float(Data[data][2])),
                     float('%.2f' % float(Data[data][3])),
                 ])
-        WorkBook.save('Report/meitan.xlsx')
+        WorkBook.save('Report/meirui.xlsx')
 
 
 # 口碑数据管理
@@ -60,7 +62,7 @@ def ChatUpdate(Data):
         for i in range(1, 8):
             ChatSheet.cell(row, i, value=Data[data][num])
             num += 1
-    WorkBook.save('Report/meitan.xlsx')
+    WorkBook.save('Report/meirui.xlsx')
 
 
 # 订单中心
@@ -70,7 +72,7 @@ def AppointUpdate(appointmentresult):
         for col in range(1, 10):
             APPSheet.cell(int(data), col, appointmentresult[data][num])
             num += 1
-    WorkBook.save('Report/meitan.xlsx')
+    WorkBook.save('Report/meirui.xlsx')
 
 
 # 线上销售数据
@@ -82,5 +84,23 @@ def SaleOnlineUpdate(SaleOnlineresult):
             SaleSheet.cell(row, col, SaleOnlineresult[data][num])
             num += 1
         row += 1
-    WorkBook.save('Report/meitan.xlsx')
+    WorkBook.save('Report/meirui.xlsx')
 
+
+# 预约数据
+def CommentUpdate(CommentResult):
+    row = 2
+    row_r = 2
+    for data in CommentResult:
+        num = 0
+        num_r = 0
+        if CommentResult[data][-2] == '是':
+            for col in range(1, 16):
+                CommentSheet_R.cell(row_r, col, CommentResult[data][num_r])
+                num_r += 1
+            row_r += 1
+        for col in range(1, 16):
+            CommentSheet.cell(row, col, CommentResult[data][num])
+            num += 1
+        row += 1
+    WorkBook.save('Report/meirui.xlsx')

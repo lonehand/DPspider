@@ -1,30 +1,9 @@
-# import datetime
-# import re
+import time
 
-# test = '''
-# "mainOrderId":37181652,"uniOrderId":"153214554474475290609284","orderStatus":4,"couponValue":"45742114452","productId":3834360,"productItemId":14196495,"cooperationBizType":850,"productItemName":"润百颜1ML·首次体验价","shopId":73082729
-# ,"shopName":"成都健丽医疗美容","addTime":1532145544000,"verifyTime":1535775368000,"mobile":"186****4959","availableCouponCount":0,"refundCouponCount":0,"price":466.00,"quantity":1,"preAmount":192.00,"remainAmount":0.00,"payTypeList":["
-# 点评扫码","微信扫码","支付宝扫码","现金支付","刷卡支付","其他"],"discountDetailDTOList":[{"discountType":17,"discountAmount":234.00,"discountName":"商家立减","refundable":false
-# 1535775368000
-# '''
+def timeStamp(timeNum):
+    timeStamp = float(timeNum/1000)
+    timeArray = time.localtime(timeStamp)
+    otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+    return otherStyleTime
 
-# a = re.search(r'verifyTime":(.*?),"mobile', test).group(1)
-
-# html = 'https://e.dianping.com/receiptreport/tuangouConsumeDetail?page=%s&selectedBeginDate=%s%%2000:00:00&selectedEndDate=%s%%2000:00:00'
-# print(html % ('1','2','3'))
-import json
-from urllib.parse import urlencode
-postData = {
-    "shopId": 98380431,
-    "star": "3",
-    "projectType": "1",
-    "startDate": "2018-01-01",
-    "endDate": "2018-09-01",
-    "page": 1,
-    "pageSize": 100,
-    "reviewState": "0"
-    }
-
-result = json.dumps(postData)
-
-print(result)
+print(timeStamp(1534393295000)[11:])

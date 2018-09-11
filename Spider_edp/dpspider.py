@@ -4,7 +4,7 @@ import re
 import time
 
 import requests
-from urllib.parse import urlencode
+import json
 from lxml import etree
 from selenium import webdriver
 from selenium.webdriver import ActionChains
@@ -14,7 +14,7 @@ from Spider_edp.datachange import AppointMent_Optimization
 from Spider_edp.datachange import DataOptimization
 from Spider_edp.datachange import MeChart_Optimization
 from Spider_edp.datachange import SaleOnline_Optimaization
-
+from Spider_edp.datachange import Commment_Optimaization
 
 # 浏览器设置
 ChromeOptions = webdriver.ChromeOptions()
@@ -30,20 +30,38 @@ accountdic = {
 Appointresult = []
 Appintdict = {}
 
-Account = ["meiruiTF", "cdjianli", "bjykyl", "cicheng", 'tongyan88888', 'fenghuangyimei', 'tjsgzx520', 'ieshan23', 'HX73357653', 'deermeike', 'mtzyyzx']
-Password = ["cdmeirui123", "cdjianli123", "ykyl180225", "71815igm", 'tongyan61', 'fhymfh1234', 'tjsgzx2015', '37878jmd', '65787488', '30826rpo', 'meitan666']
+Account = [
+    "meiruiTF", "cdjianli", "bjykyl", "cicheng", 'tongyan88888',
+    'fenghuangyimei', 'tjsgzx520', 'ieshan23', 'HX73357653', 'deermeike',
+    'mtzyyzx'
+]
+Password = [
+    "cdmeirui123", "cdjianli123", "ykyl180225", "71815igm", 'tongyan61',
+    'fhymfh1234', 'tjsgzx2015', '37878jmd', '65787488', '30826rpo', 'meitan666'
+]
 
 # 伪装浏览器头
 header = {
-    "Accept": "application/json, text/javascript, */*; q=0.01",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Accept-Language": "zh-CN,zh;q=0.9",
-    "Connection": "keep-alive",
-    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-    "Host": "e.dianping.com",
-    "Origin": "https://e.dianping.com",
-    "Referer": "https://e.dianping.com/comment/shopreviews/list",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36"
+    "Accept":
+    "application/json, text/javascript, */*; q=0.01",
+    "Accept-Encoding":
+    "gzip, deflate, br",
+    "Accept-Language":
+    "zh-CN,zh;q=0.9",
+    "Connection":
+    "keep-alive",
+    "Content-Type":
+    "application/x-www-form-urlencoded; charset=UTF-8",
+    "Host":
+    "e.dianping.com",
+    "Origin":
+    "https://e.dianping.com",
+    "Referer":
+    "https://e.dianping.com/comment/shopreviews/list",
+    "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36",
+    "X-Requested-With":
+    "XMLHttpRequest"
 }
 
 # 流量数据接口
@@ -80,25 +98,18 @@ def Get_CookeandSession(target):  # 请求商 家后台
         ChromeBrowser.get(target)
         ChromeBrowser.switch_to.frame(0)
         WebDriverWait(ChromeBrowser, 5).until(
-            lambda ChromeBrowser: ChromeBrowser.find_elements_by_xpath(
-                '//*[@id="login"]')
+            lambda ChromeBrowser: ChromeBrowser.find_elements_by_xpath('//*[@id="login"]')
         )
-        ChromeBrowser.find_element_by_xpath(
-            '//*[@id="login"]').click()
-        ChromeBrowser.find_element_by_xpath(
-            '//*[@id="login"]').send_keys(
+        ChromeBrowser.find_element_by_xpath('//*[@id="login"]').click()
+        ChromeBrowser.find_element_by_xpath('//*[@id="login"]').send_keys(
             Account[0])
-        ChromeBrowser.find_element_by_xpath(
-            '//*[@id="password"]').click()
-        ChromeBrowser.find_element_by_xpath(
-            '//*[@id="password"]').send_keys(
+        ChromeBrowser.find_element_by_xpath('//*[@id="password"]').click()
+        ChromeBrowser.find_element_by_xpath('//*[@id="password"]').send_keys(
             Password[0])
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="login-form"]/button').click()
         WebDriverWait(ChromeBrowser, 5).until(
-            lambda ChromeBrowser: ChromeBrowser.find_element_by_xpath(
-                '//*[@id="yodaBox"]'
-                )
+            lambda ChromeBrowser: ChromeBrowser.find_element_by_xpath('//*[@id="yodaBox"]')
         )
         ScrollBar = ChromeBrowser.find_element_by_xpath('//*[@id="yodaBox"]')
         RowAction.click_and_hold(ScrollBar)
@@ -110,9 +121,7 @@ def Get_CookeandSession(target):  # 请求商 家后台
                 RowAction.release()
         RowAction.perform()
         WebDriverWait(ChromeBrowser, 10).until(
-            lambda ChromeBrowser: ChromeBrowser.find_element_by_xpath(
-                '/html/body/div[2]/div/div[1]/div[4]/div/div[2]/ul/li[3]'
-                )
+            lambda ChromeBrowser: ChromeBrowser.find_element_by_xpath('/html/body/div[2]/div/div[1]/div[4]/div/div[2]/ul/li[3]')
         ).click()
         IndexCookies = ChromeBrowser.get_cookies()
         for Cookies in IndexCookies:
@@ -166,24 +175,14 @@ def Getchatdata(res):
 # ======================预约数据 放慢一秒===========================
 def Get_appdatalist(data):
     result = []
-    addtime = re.search(
-        '"addTime":"(.*?)","arriveStatus"', data
-        ).group(1).replace('T', ' ')
-    userfrom = re.search(
-        '"orderSourceVal":"(.*?)","orderTime"', data
-        ).group(1)
-    usernick = re.search(
-        '"customerName":"(.*?)","merchantComment', data
-        ).group(1)
-    phone = re.search(
-        'phoneNo":"(.*?)","productId', data
-        ).group(1)
-    comment = re.search(
-        'comment":"(.*?)","count"', data
-        ).group(1)
-    status = re.search(
-        '"arriveStatusVal":"(.*?)","comment"', data
-        ).group(1)
+    addtime = re.search('"addTime":"(.*?)","arriveStatus"',
+                        data).group(1).replace('T', ' ')
+    userfrom = re.search('"orderSourceVal":"(.*?)","orderTime"', data).group(1)
+    usernick = re.search('"customerName":"(.*?)","merchantComment',
+                         data).group(1)
+    phone = re.search('phoneNo":"(.*?)","productId', data).group(1)
+    comment = re.search('comment":"(.*?)","count"', data).group(1)
+    status = re.search('"arriveStatusVal":"(.*?)","comment"', data).group(1)
     year = addtime[:10]
     clock = addtime[11:19]
     result.append(int(year[:4]))
@@ -221,9 +220,8 @@ def GetAppointresult(res):
 
 # ========================线上订单数据================================
 def Get_YesterMonth(today):
-    return datetime.date(
-        today.year - (today.month == 1), today.month - 1 or 12, 1
-        )
+    return datetime.date(today.year - (today.month == 1), today.month - 1
+                         or 12, 1)
 
 
 # 开始与结束日期的13位时间戳
@@ -238,16 +236,15 @@ def GetStartandEndDate():
 # 获取HtmlTree
 def Get_SaleTree(res, starttime, endtime):
     page = 1
-    result = res.get(
-        SaleOnline_html % (str(page), starttime, endtime)
-        )
+    result = res.get(SaleOnline_html % (str(page), starttime, endtime))
     return result.text
 
 
 def Get_MaxPage(SaleOnlinetree):
     maxpage = 0
     SaleTree = etree.HTML(SaleOnlinetree)
-    pagelist = SaleTree.xpath('//*[@id="deal-consume-form"]/div/div[3]/div[2]/div[1]/div/div/div/a')
+    pagelist = SaleTree.xpath(
+        '//*[@id="deal-consume-form"]/div/div[3]/div[2]/div[1]/div/div/div/a')
     for i in pagelist:
         maxpage += 1
     return maxpage
@@ -260,15 +257,17 @@ def GetSaleOnlineresult(res):
     SaleOnlinetree = Get_SaleTree(res, starttime, endtime)
     maxpage = int(Get_MaxPage(SaleOnlinetree))
     for page in range(1, maxpage):
-        SaleOnlinetree = res.get(SaleOnline_html % (str(page), starttime, endtime)).text
+        SaleOnlinetree = res.get(
+            SaleOnline_html % (str(page), starttime, endtime)).text
         SaleOnlineData.update(SaleOnline_Optimaization(SaleOnlinetree))
     return SaleOnlineData
 
 
 # +++==================口碑数据###########################
 def Get_CommentTree(res, postData):
-    commenttree = res.get(Comment_api, postData, headers=header)
-    return commenttree
+    commenttree = res.post(
+        Comment_api, data={'postData': json.dumps(postData)}, headers=header)
+    return commenttree.text
 
 
 def GetCommentResult(res):
@@ -277,13 +276,14 @@ def GetCommentResult(res):
         "shopId": "8352512",
         "star": "3",
         "projectType": "1",
-        "startDate": "2018-08-12",
-        "endDate": "2018-09-10",
+        "startDate": starttime,
+        "endDate": endtime,
         "page": "1",
-        "pageSize": "10",
+        "pageSize": "100",
         "reviewState": "0"
-        }
-    # postData = urlencode(postData)
-    # print(postData)
+    }
+
     CommentTree = Get_CommentTree(res, postData)
-    print(CommentTree)
+    CommentResult = Commment_Optimaization(CommentTree)
+
+    return CommentResult

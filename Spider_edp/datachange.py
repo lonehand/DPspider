@@ -3,7 +3,6 @@
 import re
 import time
 from lxml import etree
-from lxml.html import fromstring, tostring
 
 TimeNow = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())[10:]
 
@@ -30,7 +29,6 @@ def Getlist(data):
         return '无'
 
 
-# ++++++++++++++++ 流量数据 ++++++++++++++++++
 def DataOptimization(ScaleResponse, QualityResponse):
     try:
         global num
@@ -103,20 +101,24 @@ def MeChart_Optimization(MerChatPage):
     return merchatDict
 
 
+# ==================预约数据==============================
 def AppointMent_Optimization(AppointMenttree):
-    Tdata = re.search(
-        '"records":\[(.*?)\],"sortAsc":', AppointMenttree, re.S
-        ).group(1).replace(' ', '').replace('},{', '?')[1:-1]
+    Tdata = re.search('"records":\[(.*?)\],"sortAsc":', AppointMenttree,
+                      re.S).group(1).replace(' ', '').replace('},{', '?')[1:-1]
     result = Tdata.split('?')
     return result
 
 
+# ====================线上订单============================
 def SaleOnline_Optimaization(SaleOnlinetree):
     saledict = {}
     htmltree = etree.HTML(SaleOnlinetree)
     data = htmltree.xpath('//*[@id="consume-detail-list"]/thead')[0]
-    original_html = etree.tostring(data, encoding='utf-8', pretty_print=True, method='html')
-    htmlstr = str(original_html, encoding="utf-8").replace(' ', '').replace('\n', '').replace('-', '0')
+    original_html = etree.tostring(
+        data, encoding='utf-8', pretty_print=True, method='html')
+    htmlstr = str(
+        original_html,
+        encoding="utf-8").replace(' ', '').replace('\n', '').replace('-', '0')
     htmllist = re.findall('<tr>(.*?)</tr>', htmlstr)
     for data in htmllist[1:]:
         resultlist = []
@@ -124,13 +126,15 @@ def SaleOnline_Optimaization(SaleOnlinetree):
         if htmldata[5] == '0':
             pass
         else:
-            htmldata[5] = re.search('<div>团购立减:(.*?)</div>', htmldata[5]).group(1)
+            htmldata[5] = re.search('<div>团购立减:(.*?)</div>',
+                                    htmldata[5]).group(1)
         resultlist.append(int(htmldata[2][:4]))
         resultlist.append(int(htmldata[2][5:7]))
-        resultlist.append(float(htmldata[4])-float(htmldata[5]))
+        resultlist.append(float(htmldata[4]) - float(htmldata[5]))
         resultlist.append(int(htmldata[0]))
         resultlist.append(htmldata[1])
-        resultlist.append(htmldata[2][:4]+'/'+htmldata[2][5:7]+'/'+htmldata[2][8:10])
+        resultlist.append(htmldata[2][:4] + '/' + htmldata[2][5:7] + '/' +
+                          htmldata[2][8:10])
         resultlist.append(htmldata[2][10:])
         if htmldata[3][0] != '<':
             resultlist.append(htmldata[3])
@@ -143,3 +147,61 @@ def SaleOnline_Optimaization(SaleOnlinetree):
         resultlist.append(htmldata[9])
         saledict[htmldata[0]] = resultlist
     return saledict
+
+
+# ==================体验报告=======================
+# 毫秒级时间转换
+def timeStamp(timeNum):
+    timeStamp = float(timeNum / 1000)
+    timeArray = time.localtime(timeStamp)
+    otherStyleTime = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
+    return otherStyleTime
+
+
+def Commment_Optimaization(CommentTree):
+    commentdic = {}
+    num = 2
+    CommentResulet = re.search(
+        'reviewDetailDTOs":\[(.*?)\]\}\],"totalReivewNum',
+        CommentTree).group(1).replace('null},', 'null}]},').replace(
+            '\n', '').split(']},')
+    for data in CommentResulet:
+        commentlist = []
+        salebol = re.search('"orderInfoDTOList":(.*?)}', data).group(1)
+        SecoundTime = re.search('"updateTime":(.*?),"star"', data).group(1)
+        Updatetime = timeStamp(int(SecoundTime))
+        commentlist.append(int(Updatetime[:4]))
+        commentlist.append(int(Updatetime[5:7]))
+        commentlist.append(Updatetime[:10])
+        commentlist.append(Updatetime[11:])
+        commentlist.append(
+            re.search('"cityName":"(.*?)","userId', data).group(1))
+        commentlist.append(
+            re.search('shopName":"(.*?)","cityName', data).group(1))
+        commentlist.append(re.search('userNickName":"(.*?)","', data).group(1))
+        commentlist.append(
+            float(re.search('"star":(.*?),"score1', data).group(1)) / 10)
+        commentlist.append(
+            re.search('"scoreMap":(.*?),"content"', data).group(1))
+        commentlist.append(
+            int(re.search('score4":(.*?),"scoreMap', data).group(1))
+        )
+        commentlist.append(
+            int(re.search('"score3":(.*?),"score4', data).group(1))
+            )
+        commentlist.append(
+            int(re.search('"score2":(.*?),"score3"', data).group(1))
+        )
+        commentlist.append(
+            re.search('"content":"(.*?)","picUrl', data).group(1))
+        if salebol == 'null':
+            commentlist.append('否')
+            commentlist.append('无')
+        else:
+            commentlist.append('是')
+            commentlist.append(
+                re.search('"下单时间","content":"(.*?)"},', data).group(1))
+        commentdic[num] = commentlist
+        num += 1
+
+    return commentdic
