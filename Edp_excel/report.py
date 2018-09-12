@@ -4,7 +4,7 @@ import datetime
 from openpyxl import load_workbook
 
 sheet_name = ['流量数据', '咨询明细']
-filename = ['Report/meirui.xlsx']
+filename = ['Report/shiguang.xlsx']
 
 WorkBook = load_workbook(filename[0])
 FlowSheet = WorkBook['流量']
@@ -42,15 +42,15 @@ def Flowupdate(Data):
         for data in Data:
             if data > LastDay:
                 FlowSheet.append([
-                    '=YEAR(C%s)' % str(MaxLen),
-                    '=MONTH(C%s)' % str(MaxLen),
-                    datetime.datetime.strptime(data, r"%Y-%m-%d"),
+                    int(data[:4]),
+                    int(data[5:7]),
+                    datetime.datetime.strptime(data, "%Y-%m-%d"),
                     int(Data[data][0]),
                     int(Data[data][1]),
                     float('%.2f' % float(Data[data][2])),
                     float('%.2f' % float(Data[data][3])),
                 ])
-        WorkBook.save('Report/meirui.xlsx')
+        WorkBook.save('Report/shiguang.xlsx')
 
 
 # 口碑数据管理
@@ -62,7 +62,7 @@ def ChatUpdate(Data):
         for i in range(1, 8):
             ChatSheet.cell(row, i, value=Data[data][num])
             num += 1
-    WorkBook.save('Report/meirui.xlsx')
+    WorkBook.save('Report/shiguang.xlsx')
 
 
 # 订单中心
@@ -72,7 +72,7 @@ def AppointUpdate(appointmentresult):
         for col in range(1, 10):
             APPSheet.cell(int(data), col, appointmentresult[data][num])
             num += 1
-    WorkBook.save('Report/meirui.xlsx')
+    WorkBook.save('Report/shiguang.xlsx')
 
 
 # 线上销售数据
@@ -84,7 +84,7 @@ def SaleOnlineUpdate(SaleOnlineresult):
             SaleSheet.cell(row, col, SaleOnlineresult[data][num])
             num += 1
         row += 1
-    WorkBook.save('Report/meirui.xlsx')
+    WorkBook.save('Report/shiguang.xlsx')
 
 
 # 预约数据
@@ -103,4 +103,4 @@ def CommentUpdate(CommentResult):
             CommentSheet.cell(row, col, CommentResult[data][num])
             num += 1
         row += 1
-    WorkBook.save('Report/meirui.xlsx')
+    WorkBook.save('Report/shiguang.xlsx')

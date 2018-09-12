@@ -8,16 +8,11 @@ TimeNow = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())[10:]
 
 null = 0
 false = 0
-num = 0
 
 # 流量数据结构
 values = []
 dates = ''
 DataStructure = {}
-
-# 口碑数据结构
-merchatDict = {}
-chatvalues = []
 
 
 # ++++++++++++++++ 流量数据+++++++++++++++
@@ -30,8 +25,8 @@ def Getlist(data):
 
 
 def DataOptimization(ScaleResponse, QualityResponse):
+    num = 0
     try:
-        global num
         DatesData = re.search('dates":(.*?),"detail', ScaleResponse).group(1)
         Scaleresult = re.findall('false,"value":(.*?)},', ScaleResponse)
         Qualityresult = re.findall('false,"value":(.*?)},', QualityResponse)
@@ -59,29 +54,32 @@ def DataOptimization(ScaleResponse, QualityResponse):
 
 # ++++++++++++++++++++++++++口碑数据+++++++++++++++++++++++
 def Get_MeChartData(chatDataList):
-    global chatvalues
-    chatvalues = []
+    merchatDict = {}
     for info in chatDataList:
         chatvalues = []
-        try:
+        timebool = re.search('lastContact":(.*?),"us', info).group(1)
+        if timebool != 'null':
             timedata = re.search('lastContact":"(.*?)","us', info).group(1)
+            firsttalk = re.search('firstContact":"(.*?)","la', info).group(1)
             year = int(timedata[:4])
             mounth = int(timedata[5:7])
-            nick = re.search('clientName":"(.*?)","ph', info).group(1)
-            firsttalk = re.search('firstContact":"(.*?)","la', info).group(1)
-            label = re.search('"labelName":"(.*?)"}', info).group(1)
-            shop = re.search('shopName":"(.*?)","bran', info).group(1)
-            chatvalues.append(year)
-            chatvalues.append(mounth)
-            chatvalues.append(nick)
-            chatvalues.append(firsttalk)
-            chatvalues.append(timedata)
-            chatvalues.append(label)
-            chatvalues.append(shop)
-            merchatDict[nick] = chatvalues
-        except Exception as error:
-            error
+        else:
             continue
+        labelbool = re.search('"labels":\[(.*?)\]', info).group(1)
+        if labelbool != '':
+            label = re.search('"labelName":"(.*?)"}\]', info).group(1)
+        else:
+            label = "无"
+        shop = re.search('shopName":"(.*?)","bran', info).group(1)
+        nick = re.search('clientName":"(.*?)","ph', info).group(1)
+        chatvalues.append(year)
+        chatvalues.append(mounth)
+        chatvalues.append(nick)
+        chatvalues.append(firsttalk)
+        chatvalues.append(timedata)
+        chatvalues.append(label)
+        chatvalues.append(shop)
+        merchatDict[nick] = chatvalues
     return merchatDict
 
 
@@ -103,9 +101,10 @@ def MeChart_Optimization(MerChatPage):
 
 # ==================预约数据==============================
 def AppointMent_Optimization(AppointMenttree):
-    Tdata = re.search('"records":\[(.*?)\],"sortAsc":', AppointMenttree,
-                      re.S).group(1).replace(' ', '').replace('},{', '?')[1:-1]
-    result = Tdata.split('?')
+    Tdata = re.search(
+        '"records":\[(.*?)\],"sortAsc":', AppointMenttree, re.S
+        ).group(1).replace(' ', '').replace('},{', '$')[1:-1]
+    result = Tdata.split('$')
     return result
 
 
@@ -162,12 +161,12 @@ def Commment_Optimaization(CommentTree):
     commentdic = {}
     num = 2
     CommentResulet = re.search(
-        'reviewDetailDTOs":\[(.*?)\]\}\],"totalReivewNum',
-        CommentTree).group(1).replace('null},', 'null}]},').replace(
-            '\n', '').split(']},')
+        'reviewDetailDTOs":\[(.*?)\}\],"totalReivewNum', CommentTree).group(1).replace(
+            'null},', 'null}]},'
+            ).replace('\n', '').split(']},')
     for data in CommentResulet:
         commentlist = []
-        salebol = re.search('"orderInfoDTOList":(.*?)}', data).group(1)
+        salebol = re.search('"orderInfoDTOList":(.*)', data).group(1)[:4]
         SecoundTime = re.search('"updateTime":(.*?),"star"', data).group(1)
         Updatetime = timeStamp(int(SecoundTime))
         commentlist.append(int(Updatetime[:4]))

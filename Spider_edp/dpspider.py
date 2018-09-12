@@ -66,20 +66,28 @@ header = {
 
 # 流量数据接口
 TrafficScale = '''
-http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=8352512&tab=0&device=1
+http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=59241747&tab=0&device=1
 '''
 
 # 流量质量接口
-TrafiicQuality = 'http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=8352512&tab=1&device=1'
+TrafiicQuality = '''
+http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=59241747&tab=1&device=1
+'''
 
 # 口碑管理接口
-MerChat_api = 'https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000'
+MerChat_api = '''
+https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000
+'''
 
 # 订单中心接口
-appointment_api = 'https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?display=2&shopId=8352512&page=%s'
+appointment_api = '''
+https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?shopId=59241747&datetime=%s%2C%s&page=%s&display=2
+'''
 
 # 线上销售数据（一个月+目前）
-SaleOnline_html = 'https://e.dianping.com/receiptreport/tuangouConsumeDetail?page=%s&selectedBeginDate=%s%%2000:00:00&selectedEndDate=%s%%2000:00:00'
+SaleOnline_html = '''
+https://e.dianping.com/receiptreport/tuangouConsumeDetail?page=%s&selectedBeginDate=%s%%2000:00:00&selectedEndDate=%s%%2000:00:00
+'''
 
 # 体验报告数据接口（post）
 
@@ -98,18 +106,22 @@ def Get_CookeandSession(target):  # 请求商 家后台
         ChromeBrowser.get(target)
         ChromeBrowser.switch_to.frame(0)
         WebDriverWait(ChromeBrowser, 5).until(
-            lambda ChromeBrowser: ChromeBrowser.find_elements_by_xpath('//*[@id="login"]')
+            lambda ChromeBrowser: ChromeBrowser.find_elements_by_xpath(
+                '//*[@id="login"]'
+                )
         )
         ChromeBrowser.find_element_by_xpath('//*[@id="login"]').click()
         ChromeBrowser.find_element_by_xpath('//*[@id="login"]').send_keys(
-            Account[0])
+            Account[6])
         ChromeBrowser.find_element_by_xpath('//*[@id="password"]').click()
         ChromeBrowser.find_element_by_xpath('//*[@id="password"]').send_keys(
-            Password[0])
+            Password[6])
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="login-form"]/button').click()
         WebDriverWait(ChromeBrowser, 5).until(
-            lambda ChromeBrowser: ChromeBrowser.find_element_by_xpath('//*[@id="yodaBox"]')
+            lambda ChromeBrowser: ChromeBrowser.find_element_by_xpath(
+                '//*[@id="yodaBox"]'
+                )
         )
         ScrollBar = ChromeBrowser.find_element_by_xpath('//*[@id="yodaBox"]')
         RowAction.click_and_hold(ScrollBar)
@@ -121,7 +133,9 @@ def Get_CookeandSession(target):  # 请求商 家后台
                 RowAction.release()
         RowAction.perform()
         WebDriverWait(ChromeBrowser, 10).until(
-            lambda ChromeBrowser: ChromeBrowser.find_element_by_xpath('/html/body/div[2]/div/div[1]/div[4]/div/div[2]/ul/li[3]')
+            lambda ChromeBrowser: ChromeBrowser.find_element_by_xpath(
+                '/html/body/div[2]/div/div[1]/div[4]/div/div[2]/ul/li[3]'
+                )
         ).click()
         IndexCookies = ChromeBrowser.get_cookies()
         for Cookies in IndexCookies:
@@ -152,7 +166,6 @@ def get_res(IndexCookies):
 
 # 获取预约最大页数
 def get_maxpage(htmltree):
-    print(htmltree)
     max_page = re.search('"pageCount":(.*?),"pageSize"', htmltree).group(1)
     return max_page
 
@@ -200,7 +213,6 @@ def Get_appdatalist(data):
     return result
 
 
-# ==========================预约中心==================================
 def GetAppointresult(res):
     page = 1
     num = 2
@@ -208,7 +220,7 @@ def GetAppointresult(res):
     AppointMenttree = Get_appiont_Data(appointment_api, res, page)
     MaxPage = int(get_maxpage(AppointMenttree))
     for page in range(1, MaxPage + 1):
-        time.sleep(1)
+        time.sleep(0.5)
         Appointtree = Get_appiont_Data(appointment_api, res, str(page))
         AppointData = AppointMent_Optimization(Appointtree)
         for data in AppointData:
@@ -220,8 +232,8 @@ def GetAppointresult(res):
 
 # ========================线上订单数据================================
 def Get_YesterMonth(today):
-    return datetime.date(today.year - (today.month == 1), today.month - 1
-                         or 12, 1)
+    return datetime.date(
+        today.year - (today.month == 1), today.month - 1 or 12, 1)
 
 
 # 开始与结束日期的13位时间戳
@@ -273,7 +285,7 @@ def Get_CommentTree(res, postData):
 def GetCommentResult(res):
     starttime, endtime = GetStartandEndDate()
     postData = {
-        "shopId": "8352512",
+        "shopId": "59241747",
         "star": "3",
         "projectType": "1",
         "startDate": starttime,
