@@ -85,17 +85,11 @@ def Get_MeChartData(chatDataList):
 
 def MeChart_Optimization(MerChatPage):
     merchatDict = {}
-    try:
-        chatInfo = re.search('"records":(.*?)}]},"errorMsg"',
-                             MerChatPage).group(1)
-        chatData = chatInfo[1:-1].replace('},', '&')
-        chatDataList = chatData.split('&')
-        try:
-            merchatDict = Get_MeChartData(chatDataList)
-        except Exception as e:
-            return e
-    except Exception as e:
-        return e
+    chatInfo = re.search('"records":(.*?)\}\]\},"errorMsg"', MerChatPage).group(1)
+    chatData = chatInfo[1:-1].replace(']},', ']~￥')
+    chatDataList = chatData.split('~￥')
+    merchatDict = Get_MeChartData(chatDataList)
+    
     return merchatDict
 
 
@@ -160,47 +154,50 @@ def timeStamp(timeNum):
 def Commment_Optimaization(CommentTree):
     commentdic = {}
     num = 2
-    CommentResulet = re.search(
-        'reviewDetailDTOs":\[(.*?)\}\],"totalReivewNum', CommentTree).group(1).replace(
-            'null},', 'null}]},'
-            ).replace('\n', '').split(']},')
-    for data in CommentResulet:
-        commentlist = []
-        salebol = re.search('"orderInfoDTOList":(.*)', data).group(1)[:4]
-        SecoundTime = re.search('"updateTime":(.*?),"star"', data).group(1)
-        Updatetime = timeStamp(int(SecoundTime))
-        commentlist.append(int(Updatetime[:4]))
-        commentlist.append(int(Updatetime[5:7]))
-        commentlist.append(Updatetime[:10])
-        commentlist.append(Updatetime[11:])
-        commentlist.append(
-            re.search('"cityName":"(.*?)","userId', data).group(1))
-        commentlist.append(
-            re.search('shopName":"(.*?)","cityName', data).group(1))
-        commentlist.append(re.search('userNickName":"(.*?)","', data).group(1))
-        commentlist.append(
-            float(re.search('"star":(.*?),"score1', data).group(1)) / 10)
-        commentlist.append(
-            re.search('"scoreMap":(.*?),"content"', data).group(1))
-        commentlist.append(
-            int(re.search('score4":(.*?),"scoreMap', data).group(1))
-        )
-        commentlist.append(
-            int(re.search('"score3":(.*?),"score4', data).group(1))
-            )
-        commentlist.append(
-            int(re.search('"score2":(.*?),"score3"', data).group(1))
-        )
-        commentlist.append(
-            re.search('"content":"(.*?)","picUrl', data).group(1))
-        if salebol == 'null':
-            commentlist.append('否')
-            commentlist.append('无')
-        else:
-            commentlist.append('是')
+    if CommentTree[38:42] != 'null':
+        CommentResulet = re.search(
+            'reviewDetailDTOs":\[(.*?)\}\],"totalReivewNum', CommentTree).group(1).replace(
+                'TOList":null},', 'TOList":null}]},'
+                ).replace('\n', '').split(']},')
+        for data in CommentResulet:
+            commentlist = []
+            salebol = re.search('"orderInfoDTOList":(.*)', data).group(1)[:4]
+            SecoundTime = re.search('"updateTime":(.*?),"star"', data).group(1)
+            Updatetime = timeStamp(int(SecoundTime))
+            commentlist.append(int(Updatetime[:4]))
+            commentlist.append(int(Updatetime[5:7]))
+            commentlist.append(Updatetime[:10])
+            commentlist.append(Updatetime[11:])
             commentlist.append(
-                re.search('"下单时间","content":"(.*?)"},', data).group(1))
-        commentdic[num] = commentlist
-        num += 1
+                re.search('"cityName":"(.*?)","userId', data).group(1))
+            commentlist.append(
+                re.search('shopName":"(.*?)","cityName', data).group(1))
+            commentlist.append(re.search('userNickName":"(.*?)","', data).group(1))
+            commentlist.append(
+                float(re.search('"star":(.*?),"score1', data).group(1)) / 10)
+            commentlist.append(
+                re.search('"scoreMap":(.*?),"content"', data).group(1))
+            commentlist.append(
+                int(re.search('score4":(.*?),"scoreMap', data).group(1))
+            )
+            commentlist.append(
+                int(re.search('"score3":(.*?),"score4', data).group(1))
+                )
+            commentlist.append(
+                int(re.search('"score2":(.*?),"score3"', data).group(1))
+            )
+            commentlist.append(
+                re.search('"content":"(.*?)","picUrl', data).group(1))
+            if salebol == 'null':
+                commentlist.append('否')
+                commentlist.append('无')
+            else:
+                commentlist.append('是')
+                commentlist.append(
+                    re.search('"下单时间","content":"(.*?)"},', data).group(1))
+            commentdic[num] = commentlist
+            num += 1
 
-    return commentdic
+        return commentdic
+    else:
+        return 'null'

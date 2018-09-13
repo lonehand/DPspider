@@ -3,17 +3,6 @@
 import datetime
 from openpyxl import load_workbook
 
-sheet_name = ['流量数据', '咨询明细']
-filename = ['Report/shiguang.xlsx']
-
-WorkBook = load_workbook(filename[0])
-FlowSheet = WorkBook['流量']
-ChatSheet = WorkBook['咨询明细']
-APPSheet = WorkBook['预约数据']
-SaleSheet = WorkBook['消费数据明细（线上）']
-CommentSheet = WorkBook['口碑数据']
-CommentSheet_R = WorkBook['回复口碑']
-
 
 # 获得最大行数
 def GetBooklen(sheetname):
@@ -32,7 +21,7 @@ def Get_yesterday():
 
 
 # 流量数据管理
-def Flowupdate(Data):
+def Flowupdate(Data, FlowSheet):
     YesterDay = Get_yesterday()
     MaxLen = GetBooklen(FlowSheet)
     LastDay = FlowSheet.cell(MaxLen, 3).value.strftime('%Y-%m-%d')
@@ -50,33 +39,30 @@ def Flowupdate(Data):
                     float('%.2f' % float(Data[data][2])),
                     float('%.2f' % float(Data[data][3])),
                 ])
-        WorkBook.save('Report/shiguang.xlsx')
 
 
 # 口碑数据管理
-def ChatUpdate(Data):
+def ChatUpdate(chatreuslt, ChatSheet):
     row = 1
-    for data in Data:
+    for data in chatreuslt:
         row += 1
         num = 0
         for i in range(1, 8):
-            ChatSheet.cell(row, i, value=Data[data][num])
+            ChatSheet.cell(row, i, value=chatreuslt[data][num])
             num += 1
-    WorkBook.save('Report/shiguang.xlsx')
 
 
 # 订单中心
-def AppointUpdate(appointmentresult):
+def AppointUpdate(appointmentresult, APPSheet):
     for data in appointmentresult:
         num = 0
         for col in range(1, 10):
             APPSheet.cell(int(data), col, appointmentresult[data][num])
             num += 1
-    WorkBook.save('Report/shiguang.xlsx')
 
 
 # 线上销售数据
-def SaleOnlineUpdate(SaleOnlineresult):
+def SaleOnlineUpdate(SaleOnlineresult, SaleSheet):
     row = 2
     for data in SaleOnlineresult:
         num = 0
@@ -84,11 +70,10 @@ def SaleOnlineUpdate(SaleOnlineresult):
             SaleSheet.cell(row, col, SaleOnlineresult[data][num])
             num += 1
         row += 1
-    WorkBook.save('Report/shiguang.xlsx')
 
 
 # 预约数据
-def CommentUpdate(CommentResult):
+def CommentUpdate(CommentResult, CommentSheet, CommentSheet_R):
     row = 2
     row_r = 2
     for data in CommentResult:
@@ -103,4 +88,23 @@ def CommentUpdate(CommentResult):
             CommentSheet.cell(row, col, CommentResult[data][num])
             num += 1
         row += 1
-    WorkBook.save('Report/shiguang.xlsx')
+
+
+def Report_main(flowresult, chatresult, appointmentresult, SaleOnlineresult, CommentResult, acount):
+    filename = 'Report/%s.xlsx' % acount
+    savename = 'Report/NewReport/%s.xlsx' % acount
+    WorkBook = load_workbook(filename)
+    FlowSheet = WorkBook['流量']
+    ChatSheet = WorkBook['咨询明细']
+    APPSheet = WorkBook['预约数据']
+    SaleSheet = WorkBook['消费数据明细（线上）']
+    CommentSheet = WorkBook['口碑数据']
+    CommentSheet_R = WorkBook['回复口碑']
+
+    Flowupdate(flowresult, FlowSheet)
+    ChatUpdate(chatresult, ChatSheet)
+    AppointUpdate(appointmentresult, APPSheet)
+    SaleOnlineUpdate(SaleOnlineresult, SaleSheet)
+    if CommentResult != 'null':
+        CommentUpdate(CommentResult, CommentSheet, CommentSheet_R)
+    WorkBook.save(savename)

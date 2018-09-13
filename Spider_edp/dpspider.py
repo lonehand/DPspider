@@ -66,22 +66,22 @@ header = {
 
 # 流量数据接口
 TrafficScale = '''
-http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=59241747&tab=0&device=1
+http://e.dianping.com/mda/v2/traffic/scale?platformType=0&dateType=30&source=1&shopId=%s&tab=0&device=1
 '''
 
 # 流量质量接口
 TrafiicQuality = '''
-http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=59241747&tab=1&device=1
+http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1&shopId=%s&tab=1&device=1
 '''
 
-# 口碑管理接口
+# 咨询数据接口
 MerChat_api = '''
-https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000
+https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000&shopId=s%s
 '''
 
-# 订单中心接口
+# 预约数据接口
 appointment_api = '''
-https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?shopId=59241747&datetime=%s%2C%s&page=%s&display=2
+https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?shopId=%s&datetime=%s%%2C%s&page=%s&display=2
 '''
 
 # 线上销售数据（一个月+目前）
@@ -99,7 +99,7 @@ IndexResponse = requests.session()
 
 # session登陆商家后台模块，动态cookies
 # 请求商家后台，并提供相应返回 session()pI
-def Get_CookeandSession(target):  # 请求商 家后台
+def Get_CookeandSession(target, acountlist):  # 请求商 家后台
     try:
         ChromeBrowser = webdriver.Chrome(options=ChromeOptions)
         RowAction = ActionChains(ChromeBrowser)
@@ -112,10 +112,10 @@ def Get_CookeandSession(target):  # 请求商 家后台
         )
         ChromeBrowser.find_element_by_xpath('//*[@id="login"]').click()
         ChromeBrowser.find_element_by_xpath('//*[@id="login"]').send_keys(
-            Account[6])
+            acountlist[0])
         ChromeBrowser.find_element_by_xpath('//*[@id="password"]').click()
         ChromeBrowser.find_element_by_xpath('//*[@id="password"]').send_keys(
-            Password[6])
+            acountlist[1])
         ChromeBrowser.find_element_by_xpath(
             '//*[@id="login-form"]/button').click()
         WebDriverWait(ChromeBrowser, 5).until(
@@ -140,20 +140,23 @@ def Get_CookeandSession(target):  # 请求商 家后台
         IndexCookies = ChromeBrowser.get_cookies()
         for Cookies in IndexCookies:
             IndexResponse.cookies.set(Cookies['name'], Cookies['value'])
+        ChromeBrowser.quit()
         return IndexResponse
     except Exception as errorinfo:
         return errorinfo
 
 
 # 获取网页结构
-def Get_Data(targeturl, res):
-    result = res.get(targeturl)
+def Get_Data(targeturl, res, acountlist):
+    result = res.get(targeturl % acountlist[2])
     return result.text
 
 
 # 获取预约网页结构
-def Get_appiont_Data(targeturl, res, page):
-    result = res.get(targeturl % page)
+def Get_appiont_Data(targeturl, res, page, acountlist):
+    starttime = '1536806856000'
+    endtime = '1533052800000'
+    result = res.get(targeturl % (acountlist[2], endtime, starttime, page))
     return result.text
 
 
@@ -171,16 +174,16 @@ def get_maxpage(htmltree):
 
 
 # =======================获取流量==================================
-def Getflowdata(res):  # 主函数
-    ScaleResponse = Get_Data(TrafficScale, res)
-    QualityResponse = Get_Data(TrafiicQuality, res)
+def Getflowdata(res, acountlist):  # 主函数
+    ScaleResponse = Get_Data(TrafficScale, res, acountlist)
+    QualityResponse = Get_Data(TrafiicQuality, res, acountlist)
     TrafficDatas = DataOptimization(ScaleResponse, QualityResponse)
     return TrafficDatas
 
 
 # ========================获取口碑================================
-def Getchatdata(res):
-    MerChatResponse = Get_Data(MerChat_api, res)
+def Getchatdata(res, acountlist):
+    MerChatResponse = Get_Data(MerChat_api, res, acountlist)
     MerchatDatas = MeChart_Optimization(MerChatResponse)
     return MerchatDatas
 
@@ -213,15 +216,14 @@ def Get_appdatalist(data):
     return result
 
 
-def GetAppointresult(res):
+def GetAppointresult(res, acountlist):
     page = 1
     num = 2
     Appintdict = {}
-    AppointMenttree = Get_appiont_Data(appointment_api, res, page)
+    AppointMenttree = Get_appiont_Data(appointment_api, res, page, acountlist)
     MaxPage = int(get_maxpage(AppointMenttree))
     for page in range(1, MaxPage + 1):
-        time.sleep(0.5)
-        Appointtree = Get_appiont_Data(appointment_api, res, str(page))
+        Appointtree = Get_appiont_Data(appointment_api, res, str(page), acountlist)
         AppointData = AppointMent_Optimization(Appointtree)
         for data in AppointData:
             Ddata = Get_appdatalist(data)
@@ -236,7 +238,7 @@ def Get_YesterMonth(today):
         today.year - (today.month == 1), today.month - 1 or 12, 1)
 
 
-# 开始与结束日期的13位时间戳
+# 开始与结束日期
 def GetStartandEndDate():
     today = datetime.datetime.today()
     YesterMonth = Get_YesterMonth(today)
@@ -282,10 +284,10 @@ def Get_CommentTree(res, postData):
     return commenttree.text
 
 
-def GetCommentResult(res):
+def GetCommentResult(res, acountlist):
     starttime, endtime = GetStartandEndDate()
     postData = {
-        "shopId": "59241747",
+        "shopId": acountlist[2],
         "star": "3",
         "projectType": "1",
         "startDate": starttime,
