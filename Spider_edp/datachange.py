@@ -86,7 +86,7 @@ def Get_MeChartData(chatDataList):
 def MeChart_Optimization(MerChatPage):
     merchatDict = {}
     chatInfo = re.search('"records":(.*?)\}\]\},"errorMsg"', MerChatPage).group(1)
-    chatData = chatInfo[1:-1].replace(']},', ']~￥')
+    chatData = chatInfo.replace(']},', ']~￥')
     chatDataList = chatData.split('~￥')
     merchatDict = Get_MeChartData(chatDataList)
     

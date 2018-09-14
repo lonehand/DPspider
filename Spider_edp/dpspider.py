@@ -16,16 +16,10 @@ from Spider_edp.datachange import MeChart_Optimization
 from Spider_edp.datachange import SaleOnline_Optimaization
 from Spider_edp.datachange import Commment_Optimaization
 
+
 # 浏览器设置
 ChromeOptions = webdriver.ChromeOptions()
 ChromeOptions.add_argument("disable-infobars")
-
-# 账号与密码
-accountdic = {
-    'meiruitf': ['MeiruiTF', 'cdmeirui123', '8352512'],
-    'cdjianli': ['cdjianli', 'cdjianli123', '']
-}
-
 # 报表数据字典
 Appointresult = []
 Appintdict = {}
@@ -76,7 +70,7 @@ http://e.dianping.com/mda/v2/traffic/quality?platformType=0&dateType=30&source=1
 
 # 咨询数据接口
 MerChat_api = '''
-https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000&shopId=s%s
+https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000&fromLastContact=%s&toLastContact=%s&shopId=s%s
 '''
 
 # 预约数据接口
@@ -90,7 +84,6 @@ https://e.dianping.com/receiptreport/tuangouConsumeDetail?page=%s&selectedBeginD
 '''
 
 # 体验报告数据接口（post）
-
 Comment_api = "https://e.dianping.com/comment/shopreviews/shopreviewlist"
 
 # 登陆后的session（）
@@ -181,9 +174,14 @@ def Getflowdata(res, acountlist):  # 主函数
     return TrafficDatas
 
 
-# ========================获取口碑================================
-def Getchatdata(res, acountlist):
-    MerChatResponse = Get_Data(MerChat_api, res, acountlist)
+# ========================获取询问消息================================
+def GetChatData(targeturl, res, acountlist, TimeInfo):
+    result = res.get(targeturl % (TimeInfo[0], TimeInfo[1], acountlist[2]))
+    return result.text
+
+
+def Getchatdata(res, acountlist, TimeInfo):
+    MerChatResponse = GetChatData(MerChat_api, res, acountlist, TimeInfo)
     MerchatDatas = MeChart_Optimization(MerChatResponse)
     return MerchatDatas
 
