@@ -75,7 +75,7 @@ https://m.dianping.com/merchant/im/user/search?pageNum=1&pageSize=1000&fromLastC
 
 # 预约数据接口
 appointment_api = '''
-https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?shopId=%s&datetime=%s%%2C%s&page=%s&display=2
+https://e.dianping.com/e-beauty/book/ajax/ajaxOrderList?shopId=%s&status=0&datetime=%s%%2C%s&phoneNo=&orderSource=0&page=%s&display=2
 '''
 
 # 线上销售数据（一个月+目前）
@@ -147,7 +147,7 @@ def Get_Data(targeturl, res, acountlist):
 
 # 获取预约网页结构
 def Get_appiont_Data(targeturl, res, page, acountlist):
-    starttime = '1536806856000'
+    starttime = '1537200000000'
     endtime = '1533052800000'
     result = res.get(targeturl % (acountlist[2], endtime, starttime, page))
     return result.text

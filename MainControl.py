@@ -9,22 +9,23 @@ import datetime
 import sys
 
 from Edp_excel import report
-# from Edp_excel import DataAn
+from Edp_excel import DataAn
 from Spider_edp import dpspider
 
 LoginUrl = 'https://e.dianping.com'
 
 AcounDic = {
+    # '测试': [],
     # '八大处亚运村': ['bjykyl', 'ykyl180225', '90030589'],
     # '八大处平安门诊部': ['13883278696', 'bjpa888', '96640607'],
     # '煤炭总医院': ['mtzyyzx', 'meitan000', '98380431'],
     # '北京炫美': ['BJxuanmei123456', 'xmzx123456777', '92742255'],
     # '成都健丽': ['cdjianli', 'cdjs12345', '73082729'],
-    '成都美瑞': ['MeiruiTF', 'cdmeirui123', '8352512'],
+    # '成都美瑞': ['MeiruiTF', '93963llq', '8352512'],
     # '成都僮颜': ['tongyan88888', 'tongyan61', '98951640'],
     # '德尔美客': ['deermeike', '30826rpo', '97312957'],
     # '瑷珊': ['ieshan23', '37878jmd', '69046169'],
-    # '和谐同方': ['HX73357653', '65787488', '4255672'],
+    '和谐同方': ['HX73357653', '65787488', '4255672'],
     # '时光': ['tjsgzx520', 'tjsgzx2015', '59241747'],
     # '凤凰怡美': ['fenghuangyimei', 'fhymfh1234', '90290461']
 }
@@ -59,7 +60,7 @@ def main(TimeInfo):
             flowresult = dpspider.Getflowdata(res, AcounDic[acount])
             print('%s 已爬取流量数据' % acount)
             chatreuslt = dpspider.Getchatdata(res, AcounDic[acount], TimeInfo)
-            print('%s 已爬取咨询数据' % acount)
+            print('%s 已爬取数咨询据' % acount)
             appointmentresult = dpspider.GetAppointresult(res, AcounDic[acount])
             print('%s 已爬取预约数据' % acount)
             SaleOnlineresult = dpspider.GetSaleOnlineresult(res)
@@ -69,6 +70,7 @@ def main(TimeInfo):
             report.Report_main(flowresult, chatreuslt, appointmentresult, SaleOnlineresult, CommentResult, acount)
             print('====%s报表制作完成====' % acount)
             print('==========================')
+            # DataAn.main(TimeInfo, acount)
         else:
             time.sleep(1)
 
